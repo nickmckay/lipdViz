@@ -1,0 +1,58 @@
+Package: lipdViz
+Type: Package
+Title: Visualization for LiPD Data and Ensemble Analyses
+Version: 0.1.0
+Date: 2026-06-10
+Authors@R: c(
+    person("Nicholas", "McKay" ,email = "nick@nau.edu", role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0003-3598-5113")
+    ),
+    person("Julien", "Emile-Geay", role = c("aut"),
+      comment = c(ORCID = "0000-0001-5920-4751")
+    ),
+    person("Deborah", "Khider", role = "aut",
+        comment = c(ORCID = "0000-0001-7501-8430")
+    )
+  )
+Maintainer: Nick McKay <nick@nau.edu>
+Description: Plotting and mapping for LiPD (Linked Paleo Data) datasets and
+    time-uncertain ensemble analyses, including age model ensembles,
+    timeseries ribbons and stacks, correlation, regression, spectral, and
+    PCA results, and site maps. Split out of the 'geoChronR' package.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports:
+    ens,
+    dplyr,
+    ggmap,
+    ggplot2,
+    ggridges,
+    glue,
+    grDevices,
+    grid,
+    gridExtra,
+    lipdR,
+    magrittr,
+    mapproj,
+    maps,
+    MASS,
+    matrixStats,
+    purrr,
+    RColorBrewer,
+    scales,
+    stats,
+    tibble,
+    tidyr,
+    utils
+Suggests:
+    knitr,
+    ragg,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
+URL: https://github.com/nickmckay/lipdViz
+BugReports: https://github.com/nickmckay/lipdViz/issues
+Remotes:
+    nickmckay/ens,
+    nickmckay/lipdR
+RoxygenNote: 7.3.1
