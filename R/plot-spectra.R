@@ -35,10 +35,9 @@ plotSpectraEns = function (spec.ens,
   
   if (is.null(x.lims)) {
     x.lims = c(min(period), max(period))
-  } else {
-    f.low = 1 / x.lims[2]
-    f.high = 1 / x.lims[1]
   }
+  f.low = 1 / x.lims[2]
+  f.high = 1 / x.lims[1]
   freq_range = which(freq >= f.low & freq <= f.high)
   
   if (is.null(y.lims)) {
@@ -104,10 +103,9 @@ plotSpectrum = function (spec.df,
   period <- 1/spec.df$freq
   if (is.null(x.lims)) {
     x.lims = c(min(period),max(period))
-  } else {
-    f.low = 1/x.lims[2]
-    f.high = 1/x.lims[1]
   }
+  f.low = 1/x.lims[2]
+  f.high = 1/x.lims[1]
   freq_range = (spec.df$freq>= f.low & spec.df$freq<=f.high)
   
   if (is.null(y.lims)) {
