@@ -1,10 +1,10 @@
 # CLAUDE.md — lipdViz
 
-`lipdViz` is the **visualization** package of a five-package paleogeoscience family (split out
+`lipdViz` is the **visualization** package of a six-package paleogeoscience family (split out
 of the monolithic geoChronR, June 2026). All plotting and mapping for LiPD data and ensemble
 analyses lives here.
 
-## Package family (dependency DAG: ens ← lipdViz ← geoChronR; actR & compositeR on top)
+## Package family (dependency DAG: ens ← lipdViz ← geoChronR; actR, compositeR & fluxcapacitoR on top)
 
 | Repo (`~/GitHub/...`) | GitHub | Branch | Role |
 |---|---|---|---|
@@ -13,6 +13,7 @@ analyses lives here.
 | geoChronR-chronOnly | nickmckay/geoChronR-chronOnly | main | geoChronR 2.0: age modeling; re-exports ens+lipdViz |
 | actR | **LinkedEarth/actR** | refactor | Abrupt-change detection |
 | compositeR | nickmckay/compositeR | refactor | Record compositing |
+| fluxcapacitoR | nickmckay/fluxcapacitoR | main | Flux-focused varve age modeling (uses plotSpectraEns + plotTimeseriesEns* in its vignette) |
 
 ## What lives here
 
