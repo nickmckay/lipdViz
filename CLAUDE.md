@@ -4,15 +4,16 @@
 of the monolithic geoChronR, June 2026). All plotting and mapping for LiPD data and ensemble
 analyses lives here.
 
-## Package family (dependency DAG: ens ← lipdViz ← geoChronR; actR, compositeR & fluxcapacitoR on top)
+## Package family (dependency DAG: ens ← lipdViz ← agemodelR ← geoChronR; actR, compositeR & fluxcapacitoR on top)
 
 | Repo (`~/GitHub/...`) | GitHub | Branch | Role |
 |---|---|---|---|
 | ens | nickmckay/ens | main | Ensemble methods + UQ engine |
 | **lipdViz** (this repo) | nickmckay/lipdViz | main | Plotting + mapping; imports ens |
-| geoChronR-chronOnly | nickmckay/geoChronR-chronOnly | main | geoChronR 2.0: age modeling; re-exports ens+lipdViz |
-| actR | **LinkedEarth/actR** | refactor | Abrupt-change detection |
-| compositeR | nickmckay/compositeR | refactor | Record compositing |
+| agemodelR | nickmckay/agemodelR | main | Age modeling (Bacon, Bchron, OxCal, BAM) |
+| GeoChronR | nickmckay/GeoChronR | master | geoChronR 2.0: wrapper re-exporting agemodelR, ens and lipdViz |
+| actR | **LinkedEarth/actR** | main | Abrupt-change detection |
+| compositeR | nickmckay/compositeR | master | Record compositing |
 | fluxcapacitoR | nickmckay/fluxcapacitoR | main | Flux-focused varve age modeling (uses plotSpectraEns + plotTimeseriesEns* in its vignette) |
 
 ## What lives here
