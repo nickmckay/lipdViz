@@ -19,6 +19,7 @@ remotes::install_github("nickmckay/lipdViz")
 
 ## Related packages
 
-- [ens](https://github.com/nickmckay/ens) — ensemble methods and calculations (imported by this package)
-- [geoChronR](https://github.com/nickmckay/geoChronR-chronOnly) — age modeling (Bacon, Bchron, OxCal, BAM)
-- [lipdR](https://github.com/nickmckay/lipdR) — reading and writing LiPD files
+- [ens](https://github.com/nickmckay/ens): ensemble methods and calculations (imported by this package)
+- [agemodelR](https://github.com/nickmckay/agemodelR): age modeling (Bacon, Bchron, OxCal, BAM)
+- [geoChronR](https://github.com/nickmckay/geoChronR): loads the whole family, for scripts written for geoChronR 1.x
+- [lipdR](https://github.com/nickmckay/lipdR): reading and writing LiPD files
