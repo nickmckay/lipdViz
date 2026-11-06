@@ -449,9 +449,9 @@ plotChron <- function(L,
 #' @param chron.number chron.numData object to use (NA by default, will ask if needed)
 #' @param model.num chron.numData model to use (NA by default, will ask if needed)
 #' @param probs quantiles to calculate and plot
-#' @param n.bins number bins over which to calculate intervals. Used to calculate x.bin if not provided.
-#' @param x.bin vector of bin edges over which to bin.
-#' @param y.bin vector of bin edges over which to bin.
+#' @param n.bins ignored, kept for backward compatibility. Ribbons are quantiles of age at each depth of the ensemble table, so no binning is needed.
+#' @param x.bin ignored, kept for backward compatibility.
+#' @param y.bin ignored, kept for backward compatibility.
 #' @param color.low Band color of the outer most band.
 #' @param color.high Band color of the inner most band.
 #' @param alp Transparency of the band plot
@@ -576,7 +576,8 @@ plotChronEns = function(L,
   print("plotting your chron ensemble. This make take a few seconds...")
   
   #Ribbons first
-  chronPlot = plotTimeseriesEnsRibbons(X = ageEnsemble,Y = depth,alp = alp,probs = probs,x.bin = x.bin,y.bin = y.bin, n.bins = n.bins, color.low = color.low,color.high = color.high,color.line = color.line,line.width = line.width,add.to.plot = add.to.plot)
+  #quantiles of age at each depth (depth is exact), so the median can't double back
+  chronPlot = plotAgeDepthRibbons(ageEnsemble = ageEnsemble,depth = depth,alp = alp,probs = probs,color.low = color.low,color.high = color.high,color.line = color.line,line.width = line.width,add.to.plot = add.to.plot)
   
   
   if(plot.traces){
@@ -646,4 +647,66 @@ meltDistributionTable = function(this.dist,dist.plot = 1:length(this.dist)){
     dist.df = rbind(dist.df,rep(NA,ncol(this.df)))
   }
   return(dist.df)
+}
+
+
+#' @title Age-depth ribbons from an age ensemble
+#' @description Quantile ribbons for an age-depth model. Quantiles of age are
+#'   taken at each depth, the axis without uncertainty, so the median and every
+#'   ribbon edge are monotonic whenever the ensemble members are. (Taking
+#'   quantiles of depth at fixed ages instead, as `plotTimeseriesEnsRibbons()`
+#'   does, biases the ends of the model, because near the oldest and youngest
+#'   ages only some ensemble members reach that age.)
+#' @import ggplot2
+#' @param ageEnsemble a LiPD variable list with an ensemble matrix of ages (depths in rows, ensemble members in columns)
+#' @param depth a LiPD variable list of depths, one per row of the ensemble
+#' @inheritParams plotTimeseriesEnsRibbons
+#' @return a ggplot object
+#' @keywords internal
+plotAgeDepthRibbons <- function(add.to.plot = ggplot(),
+                                ageEnsemble,
+                                depth,
+                                alp = 1,
+                                probs = c(0.025, .25, .5, .75, .975),
+                                color.low = "white",
+                                color.high = "grey70",
+                                color.line = "Black",
+                                line.width = 1){
+  A <- as.matrix(as.data.frame(ageEnsemble$values))
+  d <- as.numeric(unlist(depth$values))
+  if(length(d) != nrow(A)){
+    stop("The depth vector (", length(d), " values) must have one value per row of the age ensemble (", nrow(A), " rows).")
+  }
+  keep <- is.finite(d) & rowSums(is.finite(A)) > 0
+  A <- A[keep, , drop = FALSE]
+  d <- d[keep]
+  o <- order(d)
+  A <- A[o, , drop = FALSE]
+  d <- d[o]
+
+  quants <- t(apply(A, 1, stats::quantile, probs = probs, na.rm = TRUE, names = FALSE))
+  if(length(probs) == 1){
+    quants <- t(quants)
+  }
+
+  nb <- floor(length(probs) / 2)
+  fillCol <- grDevices::colorRampPalette(c(color.low, color.high))(nb + 1)[-1]
+
+  p <- add.to.plot + geoChronRPlotTheme()
+  for(b in seq_len(nb)){
+    bands <- data.frame(depth = d, xmin = quants[, b], xmax = quants[, length(probs) - b + 1])
+    p <- p + geom_ribbon(data = bands, aes(y = depth, xmin = xmin, xmax = xmax),
+                         orientation = "y", fill = fillCol[b], alpha = alp)
+  }
+  if(length(probs) %% 2 == 1){
+    center <- data.frame(depth = d, age = quants[, ceiling(length(probs) / 2)])
+    p <- p + geom_path(data = center, aes(x = age, y = depth),
+                       color = color.line, linewidth = line.width)
+  }
+
+  p <- p + xlab(axisLabel(ageEnsemble)) + ylab(axisLabel(depth))
+  if(grepl("BP|ka|B2k|kyr", axisLabel(ageEnsemble))){
+    p <- p + scale_x_reverse(axisLabel(ageEnsemble))
+  }
+  return(p)
 }
