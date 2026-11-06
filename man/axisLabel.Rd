@@ -16,18 +16,18 @@ axis label as a string
 Create an axis label string from a LiPD column vector
 }
 \seealso{
-Other plot help:
-\code{\link[=AD2BP_trans]{AD2BP_trans()}},
-\code{\link[=BP2AD_trans]{BP2AD_trans()}},
-\code{\link[=bin2d]{bin2d()}},
-\code{\link[=geoChronRPlotTheme]{geoChronRPlotTheme()}},
-\code{\link[=getLegend]{getLegend()}},
-\code{\link[=getPlotRanges]{getPlotRanges()}},
-\code{\link[=kde2d]{kde2d()}},
-\code{\link[=meltDistributionTable]{meltDistributionTable()}},
-\code{\link[=periodAnnotate]{periodAnnotate()}},
-\code{\link[=quantile2d]{quantile2d()}},
-\code{\link[=reverselog10_trans]{reverselog10_trans()}}
+Other plot help: 
+\code{\link{AD2BP_trans}()},
+\code{\link{BP2AD_trans}()},
+\code{\link{bin2d}()},
+\code{\link{geoChronRPlotTheme}()},
+\code{\link{getLegend}()},
+\code{\link{getPlotRanges}()},
+\code{\link{kde2d}()},
+\code{\link{meltDistributionTable}()},
+\code{\link{periodAnnotate}()},
+\code{\link{quantile2d}()},
+\code{\link{reverselog10_trans}()}
 }
 \author{
 Nick McKay

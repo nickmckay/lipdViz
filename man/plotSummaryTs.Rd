@@ -25,7 +25,7 @@ plotSummaryTs(
 \item{step}{What step size should be used along the age axis? (default = NA, which will calculate 0.5\% of the age.range)}
 
 \item{...}{
-  Arguments passed on to \code{\link{mapTs}}
+  Arguments passed on to \code{\link[=mapTs]{mapTs}}
   \describe{
     \item{\code{color}}{variable (in TS) by which to color, or a string specifying a static ggplot color}
     \item{\code{size}}{Size of the location marker}
@@ -41,26 +41,26 @@ a gridExtra ggplot output
 TS overview plot
 }
 \seealso{
-Other plot:
-\code{\link[=plotChron]{plotChron()}},
-\code{\link[=plotChronEns]{plotChronEns()}},
-\code{\link[=plotChronEnsDiff]{plotChronEnsDiff()}},
-\code{\link[=plotCorEns]{plotCorEns()}},
-\code{\link[=plotHistEns]{plotHistEns()}},
-\code{\link[=plotLine]{plotLine()}},
-\code{\link[=plotModelDistributions]{plotModelDistributions()}},
-\code{\link[=plotPcaEns]{plotPcaEns()}},
-\code{\link[=plotPvalsEnsFdr]{plotPvalsEnsFdr()}},
-\code{\link[=plotRegressEns]{plotRegressEns()}},
-\code{\link[=plotScatterEns]{plotScatterEns()}},
-\code{\link[=plotScreeEns]{plotScreeEns()}},
-\code{\link[=plotSpectraEns]{plotSpectraEns()}},
-\code{\link[=plotSpectrum]{plotSpectrum()}},
-\code{\link[=plotSummary]{plotSummary()}},
-\code{\link[=plotTimeseriesEnsLines]{plotTimeseriesEnsLines()}},
-\code{\link[=plotTimeseriesEnsRibbons]{plotTimeseriesEnsRibbons()}},
-\code{\link[=plotTimeseriesStack]{plotTimeseriesStack()}},
-\code{\link[=plotTrendLinesEns]{plotTrendLinesEns()}},
-\code{\link[=plotTs]{plotTs()}}
+Other plot: 
+\code{\link{plotChron}()},
+\code{\link{plotChronEns}()},
+\code{\link{plotChronEnsDiff}()},
+\code{\link{plotCorEns}()},
+\code{\link{plotHistEns}()},
+\code{\link{plotLine}()},
+\code{\link{plotModelDistributions}()},
+\code{\link{plotPcaEns}()},
+\code{\link{plotPvalsEnsFdr}()},
+\code{\link{plotRegressEns}()},
+\code{\link{plotScatterEns}()},
+\code{\link{plotScreeEns}()},
+\code{\link{plotSpectraEns}()},
+\code{\link{plotSpectrum}()},
+\code{\link{plotSummary}()},
+\code{\link{plotTimeseriesEnsLines}()},
+\code{\link{plotTimeseriesEnsRibbons}()},
+\code{\link{plotTimeseriesStack}()},
+\code{\link{plotTrendLinesEns}()},
+\code{\link{plotTs}()}
 }
 \concept{plot}

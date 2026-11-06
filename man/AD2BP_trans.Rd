@@ -10,17 +10,17 @@ AD2BP_trans()
 a ggplot scale to convert a BP axis to AD
 }
 \seealso{
-Other plot help:
-\code{\link[=BP2AD_trans]{BP2AD_trans()}},
-\code{\link[=axisLabel]{axisLabel()}},
-\code{\link[=bin2d]{bin2d()}},
-\code{\link[=geoChronRPlotTheme]{geoChronRPlotTheme()}},
-\code{\link[=getLegend]{getLegend()}},
-\code{\link[=getPlotRanges]{getPlotRanges()}},
-\code{\link[=kde2d]{kde2d()}},
-\code{\link[=meltDistributionTable]{meltDistributionTable()}},
-\code{\link[=periodAnnotate]{periodAnnotate()}},
-\code{\link[=quantile2d]{quantile2d()}},
-\code{\link[=reverselog10_trans]{reverselog10_trans()}}
+Other plot help: 
+\code{\link{BP2AD_trans}()},
+\code{\link{axisLabel}()},
+\code{\link{bin2d}()},
+\code{\link{geoChronRPlotTheme}()},
+\code{\link{getLegend}()},
+\code{\link{getPlotRanges}()},
+\code{\link{kde2d}()},
+\code{\link{meltDistributionTable}()},
+\code{\link{periodAnnotate}()},
+\code{\link{quantile2d}()},
+\code{\link{reverselog10_trans}()}
 }
 \concept{plot help}

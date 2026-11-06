@@ -28,7 +28,7 @@ mapTs(
 \item{lon.range}{Longitudes to use to create baseMap range (default = NA, which determines from TS)}
 
 \item{...}{
-  Arguments passed on to \code{\link{baseMap}}
+  Arguments passed on to \code{\link[=baseMap]{baseMap}}
   \describe{
     \item{\code{lat}}{latitude(s) range to map}
     \item{\code{lon}}{longitude(s) range to map}
@@ -53,9 +53,9 @@ Create a stamen or line map of the location of a list of LiPD objects
 }
 
 \seealso{
-Other mapping:
-\code{\link[=baseMap]{baseMap()}},
-\code{\link[=mapLipd]{mapLipd()}}
+Other mapping: 
+\code{\link{baseMap}()},
+\code{\link{mapLipd}()}
 }
 \author{
 Nick McKay

@@ -55,4 +55,4 @@ BugReports: https://github.com/nickmckay/lipdViz/issues
 Remotes:
     nickmckay/ens,
     nickmckay/lipdR
-Config/roxygen2/version: 8.1.1
+RoxygenNote: 7.3.1

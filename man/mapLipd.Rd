@@ -18,7 +18,7 @@ mapLipd(D, color = NA, size = 8, shape = 21, label.site = TRUE, ...)
 \item{label.site}{Label the sites on the map (T/f)}
 
 \item{...}{
-  Arguments passed on to \code{\link{baseMap}}
+  Arguments passed on to \code{\link[=baseMap]{baseMap}}
   \describe{
     \item{\code{lat}}{latitude(s) range to map}
     \item{\code{lon}}{longitude(s) range to map}
@@ -38,9 +38,9 @@ ggmap object
 Create a google or line map of the location of a list of LiPD objects
 }
 \seealso{
-Other mapping:
-\code{\link[=baseMap]{baseMap()}},
-\code{\link[=mapTs]{mapTs()}}
+Other mapping: 
+\code{\link{baseMap}()},
+\code{\link{mapTs}()}
 }
 \author{
 Nick McKay

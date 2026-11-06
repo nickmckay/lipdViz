@@ -14,7 +14,7 @@ plotScreeEns(pcaout, null.color = "red", null.significance = 0.05, ...)
 \item{null.significance}{Significance level to of the null to plot (default = 0.05).}
 
 \item{...}{
-  Arguments passed on to \code{\link{plotTimeseriesEnsRibbons}}
+  Arguments passed on to \code{\link[=plotTimeseriesEnsRibbons]{plotTimeseriesEnsRibbons}}
   \describe{
     \item{\code{X}}{A LiPD variable list to plot, including values, units, names, and more}
     \item{\code{Y}}{A LiPD variable list to plot, including values, units, names, and more}
@@ -39,30 +39,30 @@ a ggplot plot
 create a scree plot for PCA analysis
 }
 \seealso{
-Other pca:
-\code{\link[=plotPcaEns]{plotPcaEns()}}
+Other pca: 
+\code{\link{plotPcaEns}()}
 
-Other plot:
-\code{\link[=plotChron]{plotChron()}},
-\code{\link[=plotChronEns]{plotChronEns()}},
-\code{\link[=plotChronEnsDiff]{plotChronEnsDiff()}},
-\code{\link[=plotCorEns]{plotCorEns()}},
-\code{\link[=plotHistEns]{plotHistEns()}},
-\code{\link[=plotLine]{plotLine()}},
-\code{\link[=plotModelDistributions]{plotModelDistributions()}},
-\code{\link[=plotPcaEns]{plotPcaEns()}},
-\code{\link[=plotPvalsEnsFdr]{plotPvalsEnsFdr()}},
-\code{\link[=plotRegressEns]{plotRegressEns()}},
-\code{\link[=plotScatterEns]{plotScatterEns()}},
-\code{\link[=plotSpectraEns]{plotSpectraEns()}},
-\code{\link[=plotSpectrum]{plotSpectrum()}},
-\code{\link[=plotSummary]{plotSummary()}},
-\code{\link[=plotSummaryTs]{plotSummaryTs()}},
-\code{\link[=plotTimeseriesEnsLines]{plotTimeseriesEnsLines()}},
-\code{\link[=plotTimeseriesEnsRibbons]{plotTimeseriesEnsRibbons()}},
-\code{\link[=plotTimeseriesStack]{plotTimeseriesStack()}},
-\code{\link[=plotTrendLinesEns]{plotTrendLinesEns()}},
-\code{\link[=plotTs]{plotTs()}}
+Other plot: 
+\code{\link{plotChron}()},
+\code{\link{plotChronEns}()},
+\code{\link{plotChronEnsDiff}()},
+\code{\link{plotCorEns}()},
+\code{\link{plotHistEns}()},
+\code{\link{plotLine}()},
+\code{\link{plotModelDistributions}()},
+\code{\link{plotPcaEns}()},
+\code{\link{plotPvalsEnsFdr}()},
+\code{\link{plotRegressEns}()},
+\code{\link{plotScatterEns}()},
+\code{\link{plotSpectraEns}()},
+\code{\link{plotSpectrum}()},
+\code{\link{plotSummary}()},
+\code{\link{plotSummaryTs}()},
+\code{\link{plotTimeseriesEnsLines}()},
+\code{\link{plotTimeseriesEnsRibbons}()},
+\code{\link{plotTimeseriesStack}()},
+\code{\link{plotTrendLinesEns}()},
+\code{\link{plotTs}()}
 }
 \concept{pca}
 \concept{plot}
