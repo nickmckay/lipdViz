@@ -36,30 +36,31 @@ a ggplot object
 Plot a a single spectrum, with confidence limits (no age ensemble). Useful for comparison with plotSpectraEns() in cases of no age uncertainty (e.g. GCM output)
 }
 \seealso{
-Other plot: 
-\code{\link{plotChron}()},
-\code{\link{plotChronEns}()},
-\code{\link{plotChronEnsDiff}()},
-\code{\link{plotCorEns}()},
-\code{\link{plotHistEns}()},
-\code{\link{plotLine}()},
-\code{\link{plotModelDistributions}()},
-\code{\link{plotPcaEns}()},
-\code{\link{plotPvalsEnsFdr}()},
-\code{\link{plotRegressEns}()},
-\code{\link{plotScatterEns}()},
-\code{\link{plotScreeEns}()},
-\code{\link{plotSpectraEns}()},
-\code{\link{plotSummary}()},
-\code{\link{plotSummaryTs}()},
-\code{\link{plotTimeseriesEnsLines}()},
-\code{\link{plotTimeseriesEnsRibbons}()},
-\code{\link{plotTimeseriesStack}()},
-\code{\link{plotTrendLinesEns}()}
+Other plot:
+\code{\link[=plotChron]{plotChron()}},
+\code{\link[=plotChronEns]{plotChronEns()}},
+\code{\link[=plotChronEnsDiff]{plotChronEnsDiff()}},
+\code{\link[=plotCorEns]{plotCorEns()}},
+\code{\link[=plotHistEns]{plotHistEns()}},
+\code{\link[=plotLine]{plotLine()}},
+\code{\link[=plotModelDistributions]{plotModelDistributions()}},
+\code{\link[=plotPcaEns]{plotPcaEns()}},
+\code{\link[=plotPvalsEnsFdr]{plotPvalsEnsFdr()}},
+\code{\link[=plotRegressEns]{plotRegressEns()}},
+\code{\link[=plotScatterEns]{plotScatterEns()}},
+\code{\link[=plotScreeEns]{plotScreeEns()}},
+\code{\link[=plotSpectraEns]{plotSpectraEns()}},
+\code{\link[=plotSummary]{plotSummary()}},
+\code{\link[=plotSummaryTs]{plotSummaryTs()}},
+\code{\link[=plotTimeseriesEnsLines]{plotTimeseriesEnsLines()}},
+\code{\link[=plotTimeseriesEnsRibbons]{plotTimeseriesEnsRibbons()}},
+\code{\link[=plotTimeseriesStack]{plotTimeseriesStack()}},
+\code{\link[=plotTrendLinesEns]{plotTrendLinesEns()}},
+\code{\link[=plotTs]{plotTs()}}
 
-Other spectra: 
-\code{\link{periodAnnotate}()},
-\code{\link{reverselog10_trans}()}
+Other spectra:
+\code{\link[=periodAnnotate]{periodAnnotate()}},
+\code{\link[=reverselog10_trans]{reverselog10_trans()}}
 }
 \author{
 Julien Emile-Geay

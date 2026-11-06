@@ -48,26 +48,27 @@ Plot the output of `computeSpectraEns` as a ribbon plot of distributions, with s
 `plotSpectraEns` re-uses `plotTimeseriesRibbons` and therefore the same graphical conventions. Spectra are plotted on a log-log scale, with the x-axis labeled by periods instead of frequencies, for improved intelligibility.
 }
 \seealso{
-Other plot: 
-\code{\link{plotChron}()},
-\code{\link{plotChronEns}()},
-\code{\link{plotChronEnsDiff}()},
-\code{\link{plotCorEns}()},
-\code{\link{plotHistEns}()},
-\code{\link{plotLine}()},
-\code{\link{plotModelDistributions}()},
-\code{\link{plotPcaEns}()},
-\code{\link{plotPvalsEnsFdr}()},
-\code{\link{plotRegressEns}()},
-\code{\link{plotScatterEns}()},
-\code{\link{plotScreeEns}()},
-\code{\link{plotSpectrum}()},
-\code{\link{plotSummary}()},
-\code{\link{plotSummaryTs}()},
-\code{\link{plotTimeseriesEnsLines}()},
-\code{\link{plotTimeseriesEnsRibbons}()},
-\code{\link{plotTimeseriesStack}()},
-\code{\link{plotTrendLinesEns}()}
+Other plot:
+\code{\link[=plotChron]{plotChron()}},
+\code{\link[=plotChronEns]{plotChronEns()}},
+\code{\link[=plotChronEnsDiff]{plotChronEnsDiff()}},
+\code{\link[=plotCorEns]{plotCorEns()}},
+\code{\link[=plotHistEns]{plotHistEns()}},
+\code{\link[=plotLine]{plotLine()}},
+\code{\link[=plotModelDistributions]{plotModelDistributions()}},
+\code{\link[=plotPcaEns]{plotPcaEns()}},
+\code{\link[=plotPvalsEnsFdr]{plotPvalsEnsFdr()}},
+\code{\link[=plotRegressEns]{plotRegressEns()}},
+\code{\link[=plotScatterEns]{plotScatterEns()}},
+\code{\link[=plotScreeEns]{plotScreeEns()}},
+\code{\link[=plotSpectrum]{plotSpectrum()}},
+\code{\link[=plotSummary]{plotSummary()}},
+\code{\link[=plotSummaryTs]{plotSummaryTs()}},
+\code{\link[=plotTimeseriesEnsLines]{plotTimeseriesEnsLines()}},
+\code{\link[=plotTimeseriesEnsRibbons]{plotTimeseriesEnsRibbons()}},
+\code{\link[=plotTimeseriesStack]{plotTimeseriesStack()}},
+\code{\link[=plotTrendLinesEns]{plotTrendLinesEns()}},
+\code{\link[=plotTs]{plotTs()}}
 }
 \author{
 Julien Emile-Geay

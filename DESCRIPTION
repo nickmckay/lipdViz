@@ -1,7 +1,7 @@
 Package: lipdViz
 Type: Package
 Title: Visualization for LiPD Data and Ensemble Analyses
-Version: 0.1.1
+Version: 0.1.2
 Date: 2026-06-10
 Authors@R: c(
     person("Nicholas", "McKay" ,email = "nick@nau.edu", role = c("aut", "cre"),
@@ -55,4 +55,4 @@ BugReports: https://github.com/nickmckay/lipdViz/issues
 Remotes:
     nickmckay/ens,
     nickmckay/lipdR
-RoxygenNote: 7.3.1
+Config/roxygen2/version: 8.1.1

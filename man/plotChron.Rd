@@ -34,7 +34,7 @@ plotChron(
 \item{legend.position}{where to put the legend on the chron plot?}
 
 \item{...}{
-  Arguments passed on to \code{\link[=plotChronEns]{plotChronEns}}
+  Arguments passed on to \code{\link{plotChronEns}}
   \describe{
     \item{\code{model.num}}{chron.numData model to use (NA by default, will ask if needed)}
     \item{\code{probs}}{quantiles to calculate and plot}
@@ -69,31 +69,32 @@ a ggplot object, or NA if there's chronData to plot
 Plot a chronology, either from a chron model (preferred) or from a chron measurement table if there is no model
 }
 \seealso{
-Other plot: 
-\code{\link{plotChronEns}()},
-\code{\link{plotChronEnsDiff}()},
-\code{\link{plotCorEns}()},
-\code{\link{plotHistEns}()},
-\code{\link{plotLine}()},
-\code{\link{plotModelDistributions}()},
-\code{\link{plotPcaEns}()},
-\code{\link{plotPvalsEnsFdr}()},
-\code{\link{plotRegressEns}()},
-\code{\link{plotScatterEns}()},
-\code{\link{plotScreeEns}()},
-\code{\link{plotSpectraEns}()},
-\code{\link{plotSpectrum}()},
-\code{\link{plotSummary}()},
-\code{\link{plotSummaryTs}()},
-\code{\link{plotTimeseriesEnsLines}()},
-\code{\link{plotTimeseriesEnsRibbons}()},
-\code{\link{plotTimeseriesStack}()},
-\code{\link{plotTrendLinesEns}()}
+Other plot:
+\code{\link[=plotChronEns]{plotChronEns()}},
+\code{\link[=plotChronEnsDiff]{plotChronEnsDiff()}},
+\code{\link[=plotCorEns]{plotCorEns()}},
+\code{\link[=plotHistEns]{plotHistEns()}},
+\code{\link[=plotLine]{plotLine()}},
+\code{\link[=plotModelDistributions]{plotModelDistributions()}},
+\code{\link[=plotPcaEns]{plotPcaEns()}},
+\code{\link[=plotPvalsEnsFdr]{plotPvalsEnsFdr()}},
+\code{\link[=plotRegressEns]{plotRegressEns()}},
+\code{\link[=plotScatterEns]{plotScatterEns()}},
+\code{\link[=plotScreeEns]{plotScreeEns()}},
+\code{\link[=plotSpectraEns]{plotSpectraEns()}},
+\code{\link[=plotSpectrum]{plotSpectrum()}},
+\code{\link[=plotSummary]{plotSummary()}},
+\code{\link[=plotSummaryTs]{plotSummaryTs()}},
+\code{\link[=plotTimeseriesEnsLines]{plotTimeseriesEnsLines()}},
+\code{\link[=plotTimeseriesEnsRibbons]{plotTimeseriesEnsRibbons()}},
+\code{\link[=plotTimeseriesStack]{plotTimeseriesStack()}},
+\code{\link[=plotTrendLinesEns]{plotTrendLinesEns()}},
+\code{\link[=plotTs]{plotTs()}}
 
-Other chron: 
-\code{\link{plotChronEns}()},
-\code{\link{plotChronEnsDiff}()},
-\code{\link{plotModelDistributions}()}
+Other chron:
+\code{\link[=plotChronEns]{plotChronEns()}},
+\code{\link[=plotChronEnsDiff]{plotChronEnsDiff()}},
+\code{\link[=plotModelDistributions]{plotModelDistributions()}}
 }
 \author{
 Nick McKay

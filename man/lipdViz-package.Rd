@@ -21,6 +21,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Nicholas McKay \email{nick@nau.edu} (\href{https://orcid.org/0000-0003-3598-5113}{ORCID})
   \item Julien Emile-Geay (\href{https://orcid.org/0000-0001-5920-4751}{ORCID})
   \item Deborah Khider (\href{https://orcid.org/0000-0001-7501-8430}{ORCID})
 }

@@ -502,3 +502,126 @@ plotTimeseriesStack <- function(plot.df,
   
   return(spag)
 }
+
+#' @export
+#' @family plot
+#' @title Plot a single timeseries
+#' @description Plot one LiPD timeseries against its time axis, with axis
+#'   labels and a title taken from its metadata. Takes one element of a TS
+#'   list (from `lipdR::extractTs()`) or one row of a timeseries tibble (from
+#'   `lipdR::ts2tibble()`).
+#'
+#'   Ages in years BP (relative to 1950) are plotted on a reversed axis, so
+#'   time runs left to right. With `secondary.axis = TRUE`, the other time
+#'   scale is added on top: yr BP above a year CE axis, or year CE above a
+#'   yr BP axis, using year CE = 1950 - yr BP.
+#' @import ggplot2
+#'
+#' @param ts a single timeseries: one element of a TS list, or a one-row timeseries tibble / data frame
+#' @param time.var name of the time variable. NA (default) uses "year" if the timeseries has year values, and "age" otherwise.
+#' @param secondary.axis add the other time scale (yr BP or year CE) as a second x axis? (default = FALSE)
+#' @param color line color (default = "black")
+#' @param points also draw a point at each observation? (default = FALSE)
+#' @param title plot title. NA (default) uses the dataset name. Use NULL for no title.
+#'
+#' @return a ggplot object
+#' @examples
+#' \dontrun{
+#' TS <- lipdR::extractTs(D)
+#' plotTs(TS[[1]])
+#'
+#' tib <- lipdR::ts2tibble(TS)
+#' plotTs(tib[1, ], secondary.axis = TRUE)
+#' }
+plotTs <- function(ts,
+                   time.var = NA,
+                   secondary.axis = FALSE,
+                   color = "black",
+                   points = FALSE,
+                   title = NA){
+
+  # one row of a data frame -> a list
+  if(is.data.frame(ts)){
+    if(nrow(ts) != 1){
+      stop("plotTs() plots one timeseries, but got ", nrow(ts), " rows. Use plotTimeseriesStack() for several.")
+    }
+    ts <- purrr::transpose(as.list(ts))[[1]]
+  }
+  if(!is.list(ts) || is.null(ts[["paleoData_values"]])){
+    if(is.list(ts) && length(ts) > 0 && is.list(ts[[1]]) && !is.null(ts[[1]][["paleoData_values"]])){
+      stop("plotTs() plots one timeseries, but got a TS list with ", length(ts), " entries. Use TS[[i]] for one, or plotTimeseriesStack() for several.")
+    }
+    stop("ts must be a single LiPD timeseries (one element of a TS list or one row of a timeseries tibble) with paleoData_values")
+  }
+
+  hasVals <- function(x){!is.null(x) && length(unlist(x)) > 0 && !all(is.na(unlist(x)))}
+
+  # choose the time variable
+  if(is.na(time.var)){
+    if(hasVals(ts[["year"]])){
+      time.var <- "year"
+    }else if(hasVals(ts[["age"]])){
+      time.var <- "age"
+    }else{
+      stop("This timeseries has neither year nor age values. Set time.var to the name of its time variable.")
+    }
+  }
+  if(!hasVals(ts[[time.var]])){
+    stop("This timeseries has no values for time.var = '", time.var, "'")
+  }
+
+  time <- ts[[time.var]]
+  vals <- ts[["paleoData_values"]]
+  if(NCOL(time) > 1 || NCOL(vals) > 1){
+    stop("plotTs() plots a single time axis and a single series. For ensembles, use plotTimeseriesEnsRibbons() or plotTimeseriesEnsLines().")
+  }
+  time <- suppressWarnings(as.numeric(unlist(time)))
+  vals <- suppressWarnings(as.numeric(unlist(vals)))
+  if(length(time) != length(vals)){
+    stop("The time variable (", length(time), " values) and paleoData_values (", length(vals), " values) have different lengths.")
+  }
+  df <- data.frame(time = time, value = vals)
+  df <- df[is.finite(df$time) & is.finite(df$value), ]
+  df <- df[order(df$time), ]
+
+  # labels from metadata
+  first <- function(x){
+    x <- unlist(x)
+    if(length(x) == 0 || is.na(x[1]) || !nzchar(as.character(x[1]))) NA_character_ else as.character(x[1])
+  }
+  timeUnits <- first(ts[[paste0(time.var, "Units")]])
+  if(is.na(timeUnits)){
+    timeUnits <- if(time.var == "year") "CE" else if(time.var == "age") "yr BP" else NA_character_
+  }
+  timeLab <- if(is.na(timeUnits)) time.var else paste0(time.var, " (", timeUnits, ")")
+  vn <- first(ts[["paleoData_variableName"]])
+  if(is.na(vn)) vn <- "value"
+  vu <- first(ts[["paleoData_units"]])
+  valLab <- if(is.na(vu)) vn else paste0(vn, " (", vu, ")")
+  if(length(title) == 1 && !is.null(title) && is.na(title)){
+    title <- first(ts[["dataSetName"]])
+    if(is.na(title)) title <- NULL
+  }
+
+  # time scale: is this axis ages BP (reversed), and in which multiple of years?
+  isCE <- time.var == "year" || grepl("AD|CE", timeUnits)
+  kyr <- !isCE && grepl("k", timeUnits, ignore.case = TRUE)
+  mult <- if(kyr) 1000 else 1
+
+  p <- ggplot(df, aes(x = time, y = value)) +
+    geom_line(color = color) +
+    labs(y = valLab, title = title) +
+    geoChronRPlotTheme()
+  if(points){
+    p <- p + geom_point(color = color, size = 0.8)
+  }
+
+  if(isCE){
+    sec <- if(secondary.axis) sec_axis(~ 1950 - ., name = "age (yr BP)") else waiver()
+    p <- p + scale_x_continuous(name = timeLab, sec.axis = sec)
+  }else{
+    sec <- if(secondary.axis) sec_axis(~ 1950 - . * mult, name = "year (CE)") else waiver()
+    p <- p + scale_x_reverse(name = timeLab, sec.axis = sec)
+  }
+  return(p)
+}

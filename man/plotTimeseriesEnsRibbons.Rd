@@ -52,7 +52,7 @@ plotTimeseriesEnsRibbons(
 \item{export.quantiles}{If TRUE, return the plotted quantiles rather than the plot}
 
 \item{...}{
-  Arguments passed on to \code{\link[=quantile2d]{quantile2d}}
+  Arguments passed on to \code{\link{quantile2d}}
   \describe{
     \item{\code{x}}{n by m matrix where n is the number of observations and m is >= 1}
     \item{\code{y}}{n by j matrix where n is the number of observations and j is >= 1}
@@ -68,26 +68,27 @@ A ggplot object OR list of plotted quantiles, depending on export.quantiles
 Plot an ensemble timeseries as a set of bands of probability. Useful for displaying the full range of probability across ensemble members.
 }
 \seealso{
-Other plot: 
-\code{\link{plotChron}()},
-\code{\link{plotChronEns}()},
-\code{\link{plotChronEnsDiff}()},
-\code{\link{plotCorEns}()},
-\code{\link{plotHistEns}()},
-\code{\link{plotLine}()},
-\code{\link{plotModelDistributions}()},
-\code{\link{plotPcaEns}()},
-\code{\link{plotPvalsEnsFdr}()},
-\code{\link{plotRegressEns}()},
-\code{\link{plotScatterEns}()},
-\code{\link{plotScreeEns}()},
-\code{\link{plotSpectraEns}()},
-\code{\link{plotSpectrum}()},
-\code{\link{plotSummary}()},
-\code{\link{plotSummaryTs}()},
-\code{\link{plotTimeseriesEnsLines}()},
-\code{\link{plotTimeseriesStack}()},
-\code{\link{plotTrendLinesEns}()}
+Other plot:
+\code{\link[=plotChron]{plotChron()}},
+\code{\link[=plotChronEns]{plotChronEns()}},
+\code{\link[=plotChronEnsDiff]{plotChronEnsDiff()}},
+\code{\link[=plotCorEns]{plotCorEns()}},
+\code{\link[=plotHistEns]{plotHistEns()}},
+\code{\link[=plotLine]{plotLine()}},
+\code{\link[=plotModelDistributions]{plotModelDistributions()}},
+\code{\link[=plotPcaEns]{plotPcaEns()}},
+\code{\link[=plotPvalsEnsFdr]{plotPvalsEnsFdr()}},
+\code{\link[=plotRegressEns]{plotRegressEns()}},
+\code{\link[=plotScatterEns]{plotScatterEns()}},
+\code{\link[=plotScreeEns]{plotScreeEns()}},
+\code{\link[=plotSpectraEns]{plotSpectraEns()}},
+\code{\link[=plotSpectrum]{plotSpectrum()}},
+\code{\link[=plotSummary]{plotSummary()}},
+\code{\link[=plotSummaryTs]{plotSummaryTs()}},
+\code{\link[=plotTimeseriesEnsLines]{plotTimeseriesEnsLines()}},
+\code{\link[=plotTimeseriesStack]{plotTimeseriesStack()}},
+\code{\link[=plotTrendLinesEns]{plotTrendLinesEns()}},
+\code{\link[=plotTs]{plotTs()}}
 }
 \author{
 Nick McKay

@@ -10,22 +10,22 @@ reverselog10_trans()
 Reverse axis in log10 scale
 }
 \seealso{
-Other plot help: 
-\code{\link{AD2BP_trans}()},
-\code{\link{BP2AD_trans}()},
-\code{\link{axisLabel}()},
-\code{\link{bin2d}()},
-\code{\link{geoChronRPlotTheme}()},
-\code{\link{getLegend}()},
-\code{\link{getPlotRanges}()},
-\code{\link{kde2d}()},
-\code{\link{meltDistributionTable}()},
-\code{\link{periodAnnotate}()},
-\code{\link{quantile2d}()}
+Other plot help:
+\code{\link[=AD2BP_trans]{AD2BP_trans()}},
+\code{\link[=BP2AD_trans]{BP2AD_trans()}},
+\code{\link[=axisLabel]{axisLabel()}},
+\code{\link[=bin2d]{bin2d()}},
+\code{\link[=geoChronRPlotTheme]{geoChronRPlotTheme()}},
+\code{\link[=getLegend]{getLegend()}},
+\code{\link[=getPlotRanges]{getPlotRanges()}},
+\code{\link[=kde2d]{kde2d()}},
+\code{\link[=meltDistributionTable]{meltDistributionTable()}},
+\code{\link[=periodAnnotate]{periodAnnotate()}},
+\code{\link[=quantile2d]{quantile2d()}}
 
-Other spectra: 
-\code{\link{periodAnnotate}()},
-\code{\link{plotSpectrum}()}
+Other spectra:
+\code{\link[=periodAnnotate]{periodAnnotate()}},
+\code{\link[=plotSpectrum]{plotSpectrum()}}
 }
 \author{
 Nick McKay, Julien Emile-Geay

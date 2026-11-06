@@ -33,30 +33,31 @@ A ggplot object
 Plot an ensemble of trendlines based on slope and intercept.
 }
 \seealso{
-Other plot: 
-\code{\link{plotChron}()},
-\code{\link{plotChronEns}()},
-\code{\link{plotChronEnsDiff}()},
-\code{\link{plotCorEns}()},
-\code{\link{plotHistEns}()},
-\code{\link{plotLine}()},
-\code{\link{plotModelDistributions}()},
-\code{\link{plotPcaEns}()},
-\code{\link{plotPvalsEnsFdr}()},
-\code{\link{plotRegressEns}()},
-\code{\link{plotScatterEns}()},
-\code{\link{plotScreeEns}()},
-\code{\link{plotSpectraEns}()},
-\code{\link{plotSpectrum}()},
-\code{\link{plotSummary}()},
-\code{\link{plotSummaryTs}()},
-\code{\link{plotTimeseriesEnsLines}()},
-\code{\link{plotTimeseriesEnsRibbons}()},
-\code{\link{plotTimeseriesStack}()}
+Other plot:
+\code{\link[=plotChron]{plotChron()}},
+\code{\link[=plotChronEns]{plotChronEns()}},
+\code{\link[=plotChronEnsDiff]{plotChronEnsDiff()}},
+\code{\link[=plotCorEns]{plotCorEns()}},
+\code{\link[=plotHistEns]{plotHistEns()}},
+\code{\link[=plotLine]{plotLine()}},
+\code{\link[=plotModelDistributions]{plotModelDistributions()}},
+\code{\link[=plotPcaEns]{plotPcaEns()}},
+\code{\link[=plotPvalsEnsFdr]{plotPvalsEnsFdr()}},
+\code{\link[=plotRegressEns]{plotRegressEns()}},
+\code{\link[=plotScatterEns]{plotScatterEns()}},
+\code{\link[=plotScreeEns]{plotScreeEns()}},
+\code{\link[=plotSpectraEns]{plotSpectraEns()}},
+\code{\link[=plotSpectrum]{plotSpectrum()}},
+\code{\link[=plotSummary]{plotSummary()}},
+\code{\link[=plotSummaryTs]{plotSummaryTs()}},
+\code{\link[=plotTimeseriesEnsLines]{plotTimeseriesEnsLines()}},
+\code{\link[=plotTimeseriesEnsRibbons]{plotTimeseriesEnsRibbons()}},
+\code{\link[=plotTimeseriesStack]{plotTimeseriesStack()}},
+\code{\link[=plotTs]{plotTs()}}
 
-Other regress: 
-\code{\link{plotRegressEns}()},
-\code{\link{plotScatterEns}()}
+Other regress:
+\code{\link[=plotRegressEns]{plotRegressEns()}},
+\code{\link[=plotScatterEns]{plotScatterEns()}}
 }
 \author{
 Nick McKay

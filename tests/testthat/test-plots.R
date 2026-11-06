@@ -73,3 +73,64 @@ test_that("baseMap returns a ggplot for line maps", {
   m <- baseMap(lon = c(-110, -100), lat = c(35, 45), map.type = "line")
   expect_s3_class(m, "ggplot")
 })
+
+# plotTs ---------------------------------------------------------------
+
+makeTs <- function(){
+  list(dataSetName = "Test.Lake.2026",
+       paleoData_variableName = "d18O",
+       paleoData_units = "permil",
+       year = seq(0, 2000, by = 10),
+       yearUnits = "AD",
+       age = 1950 - seq(0, 2000, by = 10),
+       ageUnits = "BP",
+       paleoData_values = sin(seq(0, 2000, by = 10) / 100))
+}
+
+test_that("plotTs plots a TS list element, using year by default", {
+  p <- plotTs(makeTs())
+  expect_s3_class(p, "ggplot")
+  expect_equal(p$labels$y, "d18O (permil)")
+  expect_equal(p$labels$title, "Test.Lake.2026")
+  expect_equal(p$scales$get_scales("x")$name, "year (AD)")
+  expect_renders(p)
+})
+
+test_that("plotTs falls back to age and reverses the axis", {
+  ts <- makeTs()
+  ts$year <- NULL
+  p <- plotTs(ts)
+  sx <- p$scales$get_scales("x")
+  expect_equal(sx$name, "age (BP)")
+  expect_equal(sx$trans$name, "reverse")
+  expect_renders(p)
+})
+
+test_that("plotTs adds a secondary time axis", {
+  p <- plotTs(makeTs(), secondary.axis = TRUE)
+  expect_false(inherits(p$scales$get_scales("x")$secondary.axis, "waiver"))
+  expect_renders(p)
+  ts <- makeTs(); ts$year <- NULL; ts$age <- ts$age / 1000; ts$ageUnits <- "ka"
+  expect_renders(plotTs(ts, secondary.axis = TRUE))
+})
+
+test_that("plotTs accepts a one-row tibble", {
+  ts <- makeTs()
+  tib <- tibble::tibble(dataSetName = ts$dataSetName,
+                        paleoData_variableName = ts$paleoData_variableName,
+                        paleoData_units = ts$paleoData_units,
+                        year = list(ts$year), yearUnits = ts$yearUnits,
+                        paleoData_values = list(ts$paleoData_values))
+  p <- plotTs(tib)
+  expect_equal(p$labels$y, "d18O (permil)")
+  expect_renders(p)
+  expect_error(plotTs(rbind(tib, tib)), "one timeseries")
+})
+
+test_that("plotTs gives helpful errors", {
+  expect_error(plotTs(list(makeTs(), makeTs())), "TS list")
+  ts <- makeTs(); ts$year <- NULL; ts$age <- NULL
+  expect_error(plotTs(ts), "neither year nor age")
+  ts <- makeTs(); ts$paleoData_values <- matrix(0, 201, 3)
+  expect_error(plotTs(ts), "ensembles")
+})
