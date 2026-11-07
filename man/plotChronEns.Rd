@@ -49,11 +49,11 @@ plotChronEns(
 
 \item{probs}{quantiles to calculate and plot}
 
-\item{x.bin}{vector of bin edges over which to bin.}
+\item{x.bin}{ignored, kept for backward compatibility.}
 
-\item{y.bin}{vector of bin edges over which to bin.}
+\item{y.bin}{ignored, kept for backward compatibility.}
 
-\item{n.bins}{number bins over which to calculate intervals. Used to calculate x.bin if not provided.}
+\item{n.bins}{ignored, kept for backward compatibility. Ribbons are quantiles of age at each depth of the ensemble table, so no binning is needed.}
 
 \item{color.low}{Band color of the outer most band.}
 

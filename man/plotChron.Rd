@@ -38,9 +38,9 @@ plotChron(
   \describe{
     \item{\code{model.num}}{chron.numData model to use (NA by default, will ask if needed)}
     \item{\code{probs}}{quantiles to calculate and plot}
-    \item{\code{n.bins}}{number bins over which to calculate intervals. Used to calculate x.bin if not provided.}
-    \item{\code{x.bin}}{vector of bin edges over which to bin.}
-    \item{\code{y.bin}}{vector of bin edges over which to bin.}
+    \item{\code{n.bins}}{ignored, kept for backward compatibility. Ribbons are quantiles of age at each depth of the ensemble table, so no binning is needed.}
+    \item{\code{x.bin}}{ignored, kept for backward compatibility.}
+    \item{\code{y.bin}}{ignored, kept for backward compatibility.}
     \item{\code{color.low}}{Band color of the outer most band.}
     \item{\code{color.high}}{Band color of the inner most band.}
     \item{\code{alp}}{Transparency of the band plot}

@@ -74,6 +74,48 @@ test_that("baseMap returns a ggplot for line maps", {
   expect_s3_class(m, "ggplot")
 })
 
+# plotChronEns / age-depth ribbons --------------------------------------
+
+makeAgeDepthEns <- function(){
+  # 1000 monotonic age-depth models whose basal ages differ widely, the
+  # situation that made age-binned quantiles hook back at the ends
+  set.seed(7)
+  depth <- seq(0, 700, by = 10)
+  A <- sapply(1:200, function(i){
+    rates <- rexp(length(depth) - 1, rate = 1 / runif(1, 10, 30))
+    c(0, cumsum(rates))
+  })
+  list(depth = depth, A = A)
+}
+
+test_that("age-depth ribbons are monotonic in depth", {
+  e <- makeAgeDepthEns()
+  p <- lipdViz:::plotAgeDepthRibbons(
+    ageEnsemble = list(values = e$A, variableName = "ageEnsemble", units = "yr BP"),
+    depth = list(values = e$depth, variableName = "depth", units = "cm"))
+  b <- ggplot2::ggplot_build(p)
+  # the last layer is the median path; every ribbon edge and the median must
+  # get older with depth
+  for(l in seq_along(b$data)){
+    d <- b$data[[l]]
+    d <- d[order(d$y), ]
+    for(col in intersect(c("x", "xmin", "xmax"), names(d))){
+      # x is plotted on a reversed axis, so older ages are more negative
+      expect_true(all(diff(d[[col]]) <= 1e-8), info = paste("layer", l, col))
+    }
+  }
+  expect_renders(p)
+})
+
+test_that("age-based binning shows the end-of-model artifact that depth quantiles avoid", {
+  e <- makeAgeDepthEns()
+  q <- quantile2d(e$A, matrix(e$depth, ncol = 1), n.bins = 200, probs = 0.5)
+  med <- q$quants[, 1]
+  ok <- is.finite(med)
+  # depth of the age-binned median decreases somewhere (doubles back)
+  expect_true(any(diff(med[ok]) < -1e-8))
+})
+
 # time and tibble input for summary plots ------------------------------
 
 test_that("plotTimeAvailabilityTs counts CE and BP records on one scale, from a tibble", {

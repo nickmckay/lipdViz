@@ -1,3 +1,7 @@
+# lipdViz 0.2.1
+
+* `plotChronEns()` no longer shows a spurious reversal at the ends of an age-depth model. Its ribbons and median are now quantiles of age at each depth of the ensemble table, so they are monotonic whenever the ensemble members are. They used to be quantiles of depth at fixed ages, which is biased near the oldest and youngest ages, where only some ensemble members reach that age; the median could hook back to shallower depths at the base of the core. The `x.bin`, `y.bin` and `n.bins` arguments are now ignored.
+
 # lipdViz 0.2.0
 
 * `plotTimeAvailabilityTs()` and `plotSummaryTs()` now use each record's `time` by default (`age.var = "time"`), converted to a common scale with the new `time.units` argument (default "yr BP"), using the time metadata from `lipdR::extractTs()`. Records in year CE and yr BP are counted together; with `time.units = "CE"` the axis runs forward. An explicit `age.var` (e.g. "age") works as before. Requires lipdR >= 0.7.3.
