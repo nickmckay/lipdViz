@@ -8,8 +8,9 @@ plotSummaryTs(
   TS,
   sort.var = "archiveType",
   age.range = NA,
-  age.var = "age",
+  age.var = "time",
   step = NA,
+  time.units = "yr BP",
   ...
 )
 }
@@ -20,9 +21,11 @@ plotSummaryTs(
 
 \item{age.range}{a two element vector that includes the range over which you want to count (default = NA, which calculates the full range in the TS)}
 
-\item{age.var}{What age variable should be used (default = "age)}
+\item{age.var}{What time variable should be used. The default, "time", uses each record's time axis converted to `time.units`, so records in year CE and yr BP can be shown together. Any other name (e.g. "age") is used as it is.}
 
 \item{step}{What step size should be used along the age axis? (default = NA, which will calculate 0.5\% of the age.range)}
+
+\item{time.units}{the time scale to plot on when age.var = "time" (default = "yr BP"). age.range and step are in these units.}
 
 \item{...}{
   Arguments passed on to \code{\link[=mapTs]{mapTs}}
@@ -60,6 +63,7 @@ Other plot:
 \code{\link{plotTimeseriesEnsLines}()},
 \code{\link{plotTimeseriesEnsRibbons}()},
 \code{\link{plotTimeseriesStack}()},
-\code{\link{plotTrendLinesEns}()}
+\code{\link{plotTrendLinesEns}()},
+\code{\link{plotTs}()}
 }
 \concept{plot}

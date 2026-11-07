@@ -1,7 +1,7 @@
 Package: lipdViz
 Type: Package
 Title: Visualization for LiPD Data and Ensemble Analyses
-Version: 0.1.2
+Version: 0.2.1
 Date: 2026-06-10
 Authors@R: c(
     person("Nicholas", "McKay" ,email = "nick@nau.edu", role = c("aut", "cre"),
@@ -31,7 +31,7 @@ Imports:
     grDevices,
     grid,
     gridExtra,
-    lipdR (>= 0.7.0),
+    lipdR (>= 0.7.3),
     magrittr,
     mapproj,
     maps,

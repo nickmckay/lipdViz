@@ -5,25 +5,26 @@
 #' @inheritParams ens::binTs
 #' @param sort.var What variable in the TS should the map and histogram be organized by? (default = "archiveType)
 #' @param age.range a two element vector that includes the range over which you want to count (default = NA, which calculates the full range in the TS)
-#' @param age.var What age variable should be used (default = "age)
+#' @param age.var What time variable should be used. The default, "time", uses each record's time axis converted to `time.units`, so records in year CE and yr BP can be shown together. Any other name (e.g. "age") is used as it is.
 #' @param step What step size should be used along the age axis? (default = NA, which will calculate 0.5\% of the age.range)
+#' @param time.units the time scale to plot on when age.var = "time" (default = "yr BP"). age.range and step are in these units.
 #' @inheritDotParams mapTs
 #' @importFrom gridExtra grid.arrange
 #' @return a gridExtra ggplot output
 #' @export
 #' @family plot
-plotSummaryTs <- function(TS,sort.var = "archiveType", age.range = NA, age.var = "age", step = NA,... ){
+plotSummaryTs <- function(TS,sort.var = "archiveType", age.range = NA, age.var = "time", step = NA, time.units = "yr BP",... ){
   
-  #check to see if TS is a tibble
-  if(tibble::is_tibble(TS)){#convert back to TS
-    TS <- lipdR::untidyTs(TS)
+  #a timeseries tibble or data frame works too
+  if(is.data.frame(TS)){
+    TS <- lipdR::as.lipdTs(TS)
   }
   
   #make a map
   tsMap <- mapTs(TS,color = sort.var,...)
   
   #make a time availability plot
-  ta <- plotTimeAvailabilityTs(TS,age.range = age.range, age.var = age.var, group.var = sort.var, step = step)+theme(legend.position = "none")
+  ta <- plotTimeAvailabilityTs(TS,age.range = age.range, age.var = age.var, group.var = sort.var, step = step, time.units = time.units)+theme(legend.position = "none")
   
   #define the layout
   lay <- rbind(c(1,1,1),
@@ -40,9 +41,10 @@ plotSummaryTs <- function(TS,sort.var = "archiveType", age.range = NA, age.var =
 
 #' 
 #' @title Create a Time availability plot
-#' @param TS a lipd TS object. This should probably be filtered to show just records you're interested in, as all we counted
+#' @param TS a lipd TS object, or a timeseries tibble. This should probably be filtered to show just records you're interested in, as all we counted
 #' @param age.range a two element vector that includes the range over which you want to count (default = NA, which calculates the full range in the TS)
-#' @param age.var What age variable should be used (default = "age")
+#' @param age.var What time variable should be used. The default, "time", uses each record's time axis converted to `time.units` with lipdR::getTsTime(), so records in year CE and yr BP are counted on one scale. Any other name (e.g. "age" or "year") is used as it is.
+#' @param time.units the time scale to count on when age.var = "time" (default = "yr BP"). age.range and step are in these units.
 #' @param group.var What variable Should be used to Group the counts? (default = "archiveType")
 #' @param step What step size should be used along the age axis? (default = NA, which will calculate 0.5\% of the age.range)
 #' @import ggplot2 tidyr
@@ -51,13 +53,25 @@ plotSummaryTs <- function(TS,sort.var = "archiveType", age.range = NA, age.var =
 #' @export
 plotTimeAvailabilityTs <- function(TS,
                                    age.range = NA,
-                                   age.var = "age",
+                                   age.var = "time",
                                    group.var = "archiveType",
-                                   step = NA){ 
+                                   step = NA,
+                                   time.units = "yr BP"){ 
   
-  #check to see if TS is a tibble
-  if(tibble::is_tibble(TS)){#convert back to TS
-    TS <- lipdR::untidyTs(TS)
+  #a timeseries tibble or data frame works too
+  if(is.data.frame(TS)){
+    TS <- lipdR::as.lipdTs(TS)
+  }
+
+  #put every record on the same time scale
+  axis.name <- age.var
+  reverse.axis <- grepl("age",age.var,ignore.case = T)
+  if(identical(age.var, "time")){
+    TS <- addPlotTime(TS, time.units)
+    age.var <- ".plotTime"
+    prograde <- isProgradeUnits(time.units)
+    axis.name <- paste0(if(prograde) "year" else "age", " (", time.units, ")")
+    reverse.axis <- !prograde
   }
   #estimate age range
   if(any(is.na(age.range))){
@@ -119,10 +133,10 @@ plotTimeAvailabilityTs <- function(TS,
     geoChronRPlotTheme()+
     ggtitle("Data availability")
   
-  if(grepl("age",age.var,ignore.case = T)){
-    densityPlot <- densityPlot+scale_x_reverse(age.var)
+  if(reverse.axis){
+    densityPlot <- densityPlot+scale_x_reverse(axis.name)
   }else{
-    densityPlot <- densityPlot+scale_x_continuous(age.var)
+    densityPlot <- densityPlot+scale_x_continuous(axis.name)
   }
   
   return(densityPlot)
@@ -155,6 +169,10 @@ mapTs <- function(TS,
                   ...){
   
   
+  #treat a plain data frame like a tibble
+  if(is.data.frame(TS) && !tibble::is_tibble(TS)){
+    TS <- tibble::as_tibble(TS)
+  }
   #check to see if TS is a tibble
   if(tibble::is_tibble(TS)){#
     lat <- TS$geo_latitude
@@ -507,4 +525,40 @@ baseMap = function(lon,
   return(baseMap )
   
   
+}
+
+
+#' Add each record's time, on one scale, for plotting
+#'
+#' Records without any time axis get NA, with a warning, so they are left out.
+#' @param TS a TS list
+#' @param time.units the target time scale
+#' @return TS with a `.plotTime` field on every record
+#' @keywords internal
+addPlotTime <- function(TS, time.units){
+  missing <- character(0)
+  for(i in seq_along(TS)){
+    tm <- tryCatch(lipdR::getTsTime(TS[[i]], units = time.units, ensemble = FALSE),
+                   error = function(e){
+                     missing <<- c(missing, TS[[i]]$paleoData_TSid %||% TS[[i]]$dataSetName %||% as.character(i))
+                     NA_real_
+                   })
+    attr(tm, "timeUnits") <- NULL
+    TS[[i]]$.plotTime <- as.numeric(tm)
+  }
+  if(length(missing) > 0){
+    warning("No usable time axis for ", length(missing), " timeseries, which are left out: ", paste(missing, collapse = ", "))
+  }
+  TS
+}
+
+`%||%` <- function(x, y){
+  if(is.null(x)) y else x
+}
+
+# Does a time scale count forward (year CE) rather than back (yr BP, ka)?
+isProgradeUnits <- function(units){
+  !is.null(units) && length(units) == 1 && !is.na(units) &&
+    grepl("\\b(AD|CE)\\b", units, ignore.case = TRUE) &&
+    !grepl("\\bBC", units, ignore.case = TRUE)
 }

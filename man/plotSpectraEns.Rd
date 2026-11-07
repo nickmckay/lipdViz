@@ -67,7 +67,8 @@ Other plot:
 \code{\link{plotTimeseriesEnsLines}()},
 \code{\link{plotTimeseriesEnsRibbons}()},
 \code{\link{plotTimeseriesStack}()},
-\code{\link{plotTrendLinesEns}()}
+\code{\link{plotTrendLinesEns}()},
+\code{\link{plotTs}()}
 }
 \author{
 Julien Emile-Geay

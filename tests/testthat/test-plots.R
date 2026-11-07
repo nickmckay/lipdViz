@@ -115,3 +115,104 @@ test_that("age-based binning shows the end-of-model artifact that depth quantile
   # depth of the age-binned median decreases somewhere (doubles back)
   expect_true(any(diff(med[ok]) < -1e-8))
 })
+
+# time and tibble input for summary plots ------------------------------
+
+test_that("plotTimeAvailabilityTs counts CE and BP records on one scale, from a tibble", {
+  yrs <- seq(1005, 1995, by = 10)
+  ce <- list(dataSetName = "ce", paleoData_TSid = "a", archiveType = "Wood", paleoData_values = yrs,
+             year = yrs, time = yrs, timeUnits = "yr AD", timeDatum = 0,
+             timeDirection = "prograde", timeExponent = 0)
+  bp <- list(dataSetName = "bp", paleoData_TSid = "b", archiveType = "LakeSediment", paleoData_values = yrs,
+             age = 1950 - yrs, time = 1950 - yrs, timeUnits = "yr BP", timeDatum = 1950,
+             timeDirection = "retrograde", timeExponent = 0)
+  TS <- structure(list(ce, bp), class = c("lipd_ts", "list"))
+  p <- plotTimeAvailabilityTs(TS, step = 10)
+  expect_equal(p$scales$get_scales("x")$name, "age (yr BP)")
+  d <- ggplot2::layer_data(p)
+  expect_true(max(d$y) == 2)
+  pt <- plotTimeAvailabilityTs(lipdR::ts2tibble(TS), step = 10)
+  expect_equal(ggplot2::layer_data(pt)$y, d$y)
+  pce <- plotTimeAvailabilityTs(TS, step = 10, time.units = "CE")
+  expect_equal(pce$scales$get_scales("x")$name, "year (CE)")
+  expect_equal(pce$scales$get_scales("x")$trans$name, "identity")
+  # old behaviour with an explicit age.var
+  expect_s3_class(plotTimeAvailabilityTs(TS[2], age.var = "age", step = 10), "ggplot")
+})
+
+# plotTs ---------------------------------------------------------------
+
+makeTs <- function(){
+  list(dataSetName = "Test.Lake.2026",
+       paleoData_variableName = "d18O",
+       paleoData_units = "permil",
+       year = seq(0, 2000, by = 10),
+       yearUnits = "AD",
+       age = 1950 - seq(0, 2000, by = 10),
+       ageUnits = "BP",
+       paleoData_values = sin(seq(0, 2000, by = 10) / 100))
+}
+
+test_that("plotTs plots a TS list element, using year by default", {
+  p <- plotTs(makeTs())
+  expect_s3_class(p, "ggplot")
+  expect_equal(p$labels$y, "d18O (permil)")
+  expect_equal(p$labels$title, "Test.Lake.2026")
+  expect_equal(p$scales$get_scales("x")$name, "year (AD)")
+  expect_renders(p)
+})
+
+test_that("plotTs falls back to age and reverses the axis", {
+  ts <- makeTs()
+  ts$year <- NULL
+  p <- plotTs(ts)
+  sx <- p$scales$get_scales("x")
+  expect_equal(sx$name, "age (BP)")
+  expect_equal(sx$trans$name, "reverse")
+  expect_renders(p)
+})
+
+test_that("plotTs adds a secondary time axis", {
+  p <- plotTs(makeTs(), secondary.axis = TRUE)
+  expect_false(inherits(p$scales$get_scales("x")$secondary.axis, "waiver"))
+  expect_renders(p)
+  ts <- makeTs(); ts$year <- NULL; ts$age <- ts$age / 1000; ts$ageUnits <- "ka"
+  expect_renders(plotTs(ts, secondary.axis = TRUE))
+})
+
+test_that("plotTs uses lipdR time metadata, and converts with time.units", {
+  ts <- makeTs()
+  ts$time <- ts$year; ts$timeUnits <- "yr AD"; ts$timeDatum <- 0
+  ts$timeDirection <- "prograde"; ts$timeExponent <- 0
+  p <- plotTs(ts)
+  expect_equal(p$scales$get_scales("x")$name, "year (yr AD)")
+  bp <- plotTs(ts, time.units = "ka")
+  sx <- bp$scales$get_scales("x")
+  expect_equal(sx$name, "age (ka)")
+  expect_equal(sx$trans$name, "reverse")
+  expect_equal(range(bp$data$time), c(-0.05, 1.95))
+  expect_renders(plotTs(ts, time.units = "ka", secondary.axis = TRUE))
+  # an explicit time.var still works
+  expect_equal(plotTs(ts, time.var = "age")$scales$get_scales("x")$name, "age (BP)")
+})
+
+test_that("plotTs accepts a one-row tibble", {
+  ts <- makeTs()
+  tib <- tibble::tibble(dataSetName = ts$dataSetName,
+                        paleoData_variableName = ts$paleoData_variableName,
+                        paleoData_units = ts$paleoData_units,
+                        year = list(ts$year), yearUnits = ts$yearUnits,
+                        paleoData_values = list(ts$paleoData_values))
+  p <- plotTs(tib)
+  expect_equal(p$labels$y, "d18O (permil)")
+  expect_renders(p)
+  expect_error(plotTs(rbind(tib, tib)), "one timeseries")
+})
+
+test_that("plotTs gives helpful errors", {
+  expect_error(plotTs(list(makeTs(), makeTs())), "TS list")
+  ts <- makeTs(); ts$year <- NULL; ts$age <- NULL
+  expect_error(plotTs(ts), "no time, year or age")
+  ts <- makeTs(); ts$paleoData_values <- matrix(0, 201, 3)
+  expect_error(plotTs(ts), "ensembles")
+})

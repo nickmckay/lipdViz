@@ -87,7 +87,8 @@ Other plot:
 \code{\link{plotSummaryTs}()},
 \code{\link{plotTimeseriesEnsLines}()},
 \code{\link{plotTimeseriesStack}()},
-\code{\link{plotTrendLinesEns}()}
+\code{\link{plotTrendLinesEns}()},
+\code{\link{plotTs}()}
 }
 \author{
 Nick McKay
