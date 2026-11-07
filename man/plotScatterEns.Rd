@@ -43,7 +43,8 @@ Other plot:
 \code{\link{plotTimeseriesEnsLines}()},
 \code{\link{plotTimeseriesEnsRibbons}()},
 \code{\link{plotTimeseriesStack}()},
-\code{\link{plotTrendLinesEns}()}
+\code{\link{plotTrendLinesEns}()},
+\code{\link{plotTs}()}
 
 Other regress: 
 \code{\link{plotRegressEns}()},

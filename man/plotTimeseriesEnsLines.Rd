@@ -55,7 +55,8 @@ Other plot:
 \code{\link{plotSummaryTs}()},
 \code{\link{plotTimeseriesEnsRibbons}()},
 \code{\link{plotTimeseriesStack}()},
-\code{\link{plotTrendLinesEns}()}
+\code{\link{plotTrendLinesEns}()},
+\code{\link{plotTs}()}
 }
 \author{
 Nick McKay
