@@ -449,9 +449,9 @@ plotPcaEns = function(ens.pc.out,
                       legend.position = c(0.5,0.5),
                       color){#now deprecated
   
-  #check to see if TS is a tibble
-  if(tibble::is_tibble(TS)){#convert back to TS
-    TS <- lipdR::untidyTs(TS)
+  #a timeseries tibble or data frame works too
+  if(is.data.frame(TS)){
+    TS <- lipdR::as.lipdTs(TS)
   }
   #Deprecation check
   if(!missing(color)){

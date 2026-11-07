@@ -1,3 +1,9 @@
+# lipdViz 0.2.0
+
+* `plotTimeAvailabilityTs()` and `plotSummaryTs()` now use each record's `time` by default (`age.var = "time"`), converted to a common scale with the new `time.units` argument (default "yr BP"), using the time metadata from `lipdR::extractTs()`. Records in year CE and yr BP are counted together; with `time.units = "CE"` the axis runs forward. An explicit `age.var` (e.g. "age") works as before. Requires lipdR >= 0.7.3.
+* `plotTs()` uses `time` and its metadata by default, so a record whose primary time column is year CE is plotted in year CE. The new `time.units` argument converts the axis (e.g. "ka"), and the secondary axis is computed with `lipdR::convertTime()`, so it is right for ka and b2k axes too.
+* `plotTimeAvailabilityTs()`, `plotSummaryTs()` and `plotPcaEns()` accept timeseries tibbles (`lipdR::ts2tibble()`). They passed tibbles to `lipdR::untidyTs()`, which expects the long `tidyTs()` format, so tibble input failed. `mapTs()` also accepts plain data frames.
+
 # lipdViz 0.1.2
 
 * New `plotTs()` plots a single timeseries (one element of a TS list, or one row of a timeseries tibble) against its time axis, with axis labels and a title from its metadata. It uses `year` if the record has it and `age` otherwise, plots ages BP on a reversed axis, and `secondary.axis = TRUE` adds the other time scale (yr BP or year CE, relative to 1950). Ensembles and multiple timeseries get an error pointing to `plotTimeseriesEnsRibbons()` and `plotTimeseriesStack()`.

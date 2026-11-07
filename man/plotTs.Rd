@@ -7,6 +7,7 @@
 plotTs(
   ts,
   time.var = NA,
+  time.units = NA,
   secondary.axis = FALSE,
   color = "black",
   points = FALSE,
@@ -16,7 +17,9 @@ plotTs(
 \arguments{
 \item{ts}{a single timeseries: one element of a TS list, or a one-row timeseries tibble / data frame}
 
-\item{time.var}{name of the time variable. NA (default) uses "year" if the timeseries has year values, and "age" otherwise.}
+\item{time.var}{name of the time variable. NA (default) uses "time" if the timeseries has time values (from `lipdR::extractTs()`), and otherwise "year" if it has year values, and "age" if not.}
+
+\item{time.units}{time scale to plot on, e.g. "yr BP", "ka" or "CE". NA (default) keeps the timeseries' own units. Applies when time.var is "time", "age" or "year".}
 
 \item{secondary.axis}{add the other time scale (yr BP or year CE) as a second x axis? (default = FALSE)}
 
@@ -35,10 +38,12 @@ Plot one LiPD timeseries against its time axis, with axis
   list (from `lipdR::extractTs()`) or one row of a timeseries tibble (from
   `lipdR::ts2tibble()`).
 
-  Ages in years BP (relative to 1950) are plotted on a reversed axis, so
-  time runs left to right. With `secondary.axis = TRUE`, the other time
-  scale is added on top: yr BP above a year CE axis, or year CE above a
-  yr BP axis, using year CE = 1950 - yr BP.
+  By default the time axis is the timeseries' `time`, with the units,
+  datum and direction that `lipdR::extractTs()` records, so a record whose
+  primary time column is year CE is plotted in year CE. Ages (yr BP, ka)
+  are plotted on a reversed axis, so time runs left to right. With
+  `secondary.axis = TRUE`, the other time scale is added on top: yr BP
+  above a year CE axis, or year CE above an age axis.
 }
 \examples{
 \dontrun{
