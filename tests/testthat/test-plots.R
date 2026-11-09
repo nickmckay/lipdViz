@@ -303,3 +303,18 @@ test_that("LiPD-object plots take direction from the time scale, and convert", {
   expect_null(pa$scales$get_scales("x"))
   expect_error(lipdViz:::convertVarTime(list(values = 1:3, units = "cm", variableName = "depth"), "ka"), "unknown")
 })
+
+test_that("plotTimeseriesStack on tidyTs() output uses the unchopped time column", {
+  ts <- list(
+    list(dataSetName = "a", paleoData_TSid = "a1", paleoData_variableName = "x", paleoData_units = "u",
+         archiveType = "Wood", paleoData_values = c(1, 2, 3), age = c(100, 200, 300), ageUnits = "yr BP",
+         time = c(100, 200, 300), timeUnits = "yr BP", timeDatum = 1950, timeDirection = "retrograde",
+         timeExponent = 0, timeVariableName = "age"),
+    list(dataSetName = "b", paleoData_TSid = "b1", paleoData_variableName = "x", paleoData_units = "u",
+         archiveType = "Wood", paleoData_values = c(3, 2, 1), age = c(150, 250, 350), ageUnits = "yr BP",
+         time = c(150, 250, 350), timeUnits = "yr BP", timeDatum = 1950, timeDirection = "retrograde",
+         timeExponent = 0, timeVariableName = "age"))
+  long <- suppressMessages(lipdR::tidyTs(lipdR::as.lipdTs(ts), age.var = "age"))
+  p <- plotTimeseriesStack(long)
+  expect_s3_class(p, "ggplot")
+})

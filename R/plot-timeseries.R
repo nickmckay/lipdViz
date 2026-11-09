@@ -386,7 +386,10 @@ plotTimeseriesStack <- function(plot.df,
   }else{
     #already long: the time variable is a column
     if(is.na(time.variable)){
-      time.variable <- intersect(c("time", "year", "age"), names(plot.df))[1]
+      # the unchopped time column (tidyTs() leaves the others as list columns)
+      cand <- intersect(c("time", "year", "age"), names(plot.df))
+      cand <- cand[!vapply(cand, function(v) is.list(plot.df[[v]]), logical(1))]
+      time.variable <- cand[1]
       if(is.na(time.variable)){
         stop("plot.df has no time, year or age column. Set time.variable.")
       }
