@@ -19,6 +19,7 @@ plotTimeseriesEnsRibbons(
   color.vector = NA,
   line.width = 1,
   export.quantiles = FALSE,
+  time.units = NA,
   ...
 )
 }
@@ -50,6 +51,8 @@ plotTimeseriesEnsRibbons(
 \item{line.width}{Width of the line}
 
 \item{export.quantiles}{If TRUE, return the plotted quantiles rather than the plot}
+
+\item{time.units}{convert X, a time variable, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale. Uses the time scale lipdR records on the column.}
 
 \item{...}{
   Arguments passed on to \code{\link[=quantile2d]{quantile2d}}

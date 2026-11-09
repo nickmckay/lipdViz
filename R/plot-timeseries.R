@@ -12,16 +12,19 @@
 #' @param color Line color (following ggplot rules)
 #' @param alp Line transparency
 #' @param add.to.plot A ggplot object to add these lines to. Default is ggplot() . 
+#' @param time.units convert X, a time variable, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale. Uses the time scale lipdR records on the column.
 #' @return A ggplot object
-plotLine = function(add.to.plot=ggplot(),X,Y,color="black",alp = 1){
+plotLine = function(add.to.plot=ggplot(),X,Y,color="black",alp = 1,time.units = NA){
   
   #X and Y and are LiPD variable list, including values, units, names, etc...
+  X <- convertVarTime(X, time.units)
   df = data.frame(x = X$values, y = Y$values)
   plot = add.to.plot+ geom_line(data=df,aes(x=x,y=y),color =color, alpha = alp)+
     ylab(axisLabel(Y))+
     geoChronRPlotTheme()
   
-  if(grepl("AD",X$units) | grepl("CE",X$units)){
+  #reverse time scales that count back; variables that aren't on a time scale are reversed unless their units say AD or CE, as before
+  if(!isReversedTimeAxis(X, fallback = !(grepl("AD",X$units) | grepl("CE",X$units)))){
     plot = plot+scale_x_continuous(name = axisLabel(X))
   }else{
     plot = plot+scale_x_reverse(name = axisLabel(X))
@@ -45,6 +48,7 @@ plotLine = function(add.to.plot=ggplot(),X,Y,color="black",alp = 1){
 #' @param alp Line transparency
 #' @param na.rm Remove NAs from X and Y? Set to FALSE to preserve line breaks where data are missing. (default = TRUE)
 #' @param add.to.plot A ggplot object to add these lines to. Default is ggplot() . 
+#' @param time.units convert X, a time variable, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale. Uses the time scale lipdR records on the column.
 #'
 #' @return A ggplot object
 plotTimeseriesEnsLines = function(add.to.plot=ggplot(),
@@ -53,9 +57,10 @@ plotTimeseriesEnsLines = function(add.to.plot=ggplot(),
                                   alp=.2,
                                   color = "blue",
                                   n.ens.plot=100,
-                                  na.rm = TRUE){
+                                  na.rm = TRUE,
+                                  time.units = NA){
   #check to see if time and values are "column lists"
-  
+  X <- convertVarTime(X, time.units)
   oX = X
   oY = Y
   if(is.list(X)){X=as.data.frame(X$values)}
@@ -121,7 +126,7 @@ plotTimeseriesEnsLines = function(add.to.plot=ggplot(),
   linePlot = linePlot+xlab(axisLabel(oX))+ylab(axisLabel(oY))
   
   #reverse the xaxis if the units are BP
-  if(any(grepl(pattern = "BP",x = axisLabel(oX))) | (grepl(pattern = "ka",x = axisLabel(oX))) | (grepl(pattern = "B2k",x = axisLabel(oX))) | (grepl(pattern = "kyr",x = axisLabel(oX)))){
+  if(isReversedTimeAxis(oX, fallback = grepl("BP|ka|B2k|kyr", axisLabel(oX)))){
     linePlot = linePlot + scale_x_reverse(name = axisLabel(oX))
   }
   
@@ -151,6 +156,7 @@ plotTimeseriesEnsLines = function(add.to.plot=ggplot(),
 #' @param add.to.plot A ggplot object to add this plot to. Default is ggplot() . 
 #' @param export.quantiles If TRUE, return the plotted quantiles rather than the plot
 #' @inheritDotParams quantile2d
+#' @param time.units convert X, a time variable, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale. Uses the time scale lipdR records on the column.
 #' @return A ggplot object OR list of plotted quantiles, depending on export.quantiles
 plotTimeseriesEnsRibbons = function(add.to.plot=ggplot(),
                                     X,
@@ -166,10 +172,12 @@ plotTimeseriesEnsRibbons = function(add.to.plot=ggplot(),
                                     color.vector = NA,
                                     line.width=1,
                                     export.quantiles = FALSE,
+                                    time.units = NA,
                                     ...){
   
   
   #check to see if time and values are "column lists"
+  X <- convertVarTime(X, time.units)
   oX = X
   oY = Y
   if(is.list(X)){X=as.data.frame(X$values)}
@@ -293,7 +301,7 @@ plotTimeseriesEnsRibbons = function(add.to.plot=ggplot(),
   bandPlot = bandPlot+xlab(axisLabel(oX))+ylab(axisLabel(oY))
   
   #reverse the xaxis if the units are BP
-  if(any(grepl(pattern = "BP",x = axisLabel(oX))) | (grepl(pattern = "ka",x = axisLabel(oX))) | (grepl(pattern = "B2k",x = axisLabel(oX))) | (grepl(pattern = "kyr",x = axisLabel(oX)))){
+  if(isReversedTimeAxis(oX, fallback = grepl("BP|ka|B2k|kyr", axisLabel(oX)))){
     bandPlot = bandPlot + scale_x_reverse(axisLabel(oX))
   }
   
@@ -312,7 +320,9 @@ plotTimeseriesEnsRibbons = function(add.to.plot=ggplot(),
 #' @import grDevices
 #' @import scales
 #' @param plot.df A tidy data.frame, typically the output of tidyTs()
-#' @param time.var Which variable to put on the x-axis. Must be in plot.df. Typically "year", "age", or "depth"
+#' @param time.variable Which variable to put on the x-axis. For a TS list or timeseries tibble, "time" (the default for those) uses each record's primary time axis, and any other time variable ("age", "year", ...) works too; every record is converted to `time.units`. For a long, tidy data.frame it must be a column: NA (default) uses "time", then "year", then "age". Non-time variables such as "depth" are plotted as they are.
+#' @param time.units the time scale to plot on, e.g. "yr BP", "ka" or "CE". NULL (default) uses the records' own scale if they share one, and yr BP otherwise. Axes in yr BP, ka or b2k run right to left, so time runs left to right.
+#' @param time.var Deprecated; use time.variable.
 #' @param color.var Which variable to color the timeseries by. The default ("paleoData_TSid") will give each timeseries it's own color. Common other options include "paleoData_variable", "archiveType", or "paleoData_units", but any variable in plot.df should work.
 #' @param invert.var Which variable to use to invert the timeseries. This should point to a variable of "positive" and "negative" (searches on "neg"), or a vector of 1s and -1s. (default = NA, which flips nothing)
 #' @param fill.alpha Transparency of the shading
@@ -329,7 +339,7 @@ plotTimeseriesEnsRibbons = function(add.to.plot=ggplot(),
 #' @section Long-form example:
 #' \href{http://nickmckay.github.io/GeoChronR/articles/PlotTimeseriesStack.html}{View a full-fledged example of how to use this function.} 
 plotTimeseriesStack <- function(plot.df,
-                                time.var = "year", 
+                                time.variable = NA, 
                                 color.var = "paleoData_TSid", 
                                 invert.var = NA,
                                 fill.alpha = 0.2, 
@@ -339,17 +349,72 @@ plotTimeseriesStack <- function(plot.df,
                                 lab.buff = 0.02, 
                                 lab.size = 3,  
                                 lab.space= 2,
-                                color.ramp = NA){
+                                color.ramp = NA,
+                                time.units = NULL,
+                                time.var = NULL){
 
-  #convert a TS list or wide TS tibble (one row per timeseries, list columns) into a long, tidy data.frame
-  if(!is.data.frame(plot.df)){
-    plot.df <- lipdR::tidyTs(plot.df,age.var = time.var)
-  }else if(is.list(plot.df$paleoData_values)){
-    plot.df <- lipdR::tidyTs(purrr::transpose(dplyr::ungroup(plot.df)),age.var = time.var)
+  time.variable <- deprecatedTimeArg(time.var, "time.var", time.variable)
+  noUnits <- is.null(time.units) || all(is.na(time.units))
+  xScale <- NULL #the time scale of the x axis, when it is one
+
+  if(!is.data.frame(plot.df) || is.list(plot.df$paleoData_values)){
+    #a TS list or wide TS tibble (one row per timeseries): put every record on one time scale, then make it long
+    entries <- if(is.data.frame(plot.df)) purrr::transpose(as.list(dplyr::ungroup(plot.df))) else plot.df
+    if(is.na(time.variable)){
+      time.variable <- "time"
+    }
+    isTime <- any(vapply(entries, function(e) time.variable %in% lipdR::tsTimeVariables(e), logical(1)))
+    if(isTime){
+      if(noUnits){
+        time.units <- lipdR::commonTimeUnits(entries, variable = time.variable)
+      }
+      tms <- lipdR::getTsTimes(entries, units = time.units, variable = time.variable, ensemble = FALSE)
+      keep <- !vapply(tms, is.null, logical(1))
+      if(!any(keep)){
+        stop("None of the timeseries have '", time.variable, "' values.")
+      }
+      entries <- entries[keep]
+      for(i in seq_along(entries)){
+        entries[[i]]$.plotTime <- as.numeric(tms[keep][[i]])
+      }
+      xvar <- ".plotTime"
+      xScale <- lipdR::timeScale(time.units)
+    }else{
+      xvar <- time.variable
+    }
+    plot.df <- lipdR::tidyTs(entries, age.var = xvar)
+  }else{
+    #already long: the time variable is a column
+    if(is.na(time.variable)){
+      time.variable <- intersect(c("time", "year", "age"), names(plot.df))[1]
+      if(is.na(time.variable)){
+        stop("plot.df has no time, year or age column. Set time.variable.")
+      }
+    }
+    xvar <- time.variable
+    unitCols <- c(if(xvar == "time") "timeUnits", paste0(xvar, "TimeUnits"), paste0(xvar, "Units"))
+    unitCol <- intersect(unitCols, names(plot.df))[1]
+    if(!is.na(unitCol)){
+      u <- unique(stats::na.omit(as.character(unlist(plot.df[[unitCol]]))))
+      if(length(u) > 1){
+        warning("The timeseries in plot.df are on different time scales (", paste(u, collapse = ", "),
+                "). Pass a TS list or timeseries tibble instead, so they can be put on one scale.", call. = FALSE)
+      }
+      if(length(u) > 0){
+        xScale <- varTimeScale(list(units = u[1]))
+      }
+    }
+    if(!noUnits){
+      if(is.null(xScale)){
+        stop("Can't convert '", xvar, "' to ", time.units, ": its time scale is unknown.")
+      }
+      plot.df[[xvar]] <- lipdR::convertTime(as.numeric(plot.df[[xvar]]), from = xScale, to = time.units)
+      xScale <- lipdR::timeScale(time.units)
+    }
   }
 
   #flatten single column matrices into vectors, ggplot2 >= 4 will not accept them
-  for(v in intersect(c(time.var,"paleoData_values"),names(plot.df))){
+  for(v in intersect(c(xvar,"paleoData_values"),names(plot.df))){
     if(NCOL(plot.df[[v]]) == 1){
       plot.df[[v]] <- as.vector(plot.df[[v]])
     }
@@ -373,7 +438,7 @@ plotTimeseriesStack <- function(plot.df,
   
   
   #check the plot.df for required variables
-  reqVar <- c("paleoData_values","paleoData_TSid","paleoData_units","paleoData_variableName","dataSetName", "archiveType",time.var)
+  reqVar <- c("paleoData_values","paleoData_TSid","paleoData_units","paleoData_variableName","dataSetName", "archiveType",xvar)
   
   for(r in 1:length(reqVar)){
     if(!any(reqVar[r] == names(plot.df))){
@@ -381,16 +446,16 @@ plotTimeseriesStack <- function(plot.df,
     }
   }
   
-  #check to see if time.var is an age ensemble
+  #check to see if xvar is an age ensemble
   
-  if(NCOL(plot.df[[time.var]]) > 1){
-    stop(glue::glue("It looks like your time.var ({time.var}) has more than 1 column ({NCOL(plot.df[[time.var]])}). plotTimeseriesStack() cannot yet handle age ensembles."))
+  if(NCOL(plot.df[[xvar]]) > 1){
+    stop(glue::glue("It looks like your xvar ({xvar}) has more than 1 column ({NCOL(plot.df[[xvar]])}). plotTimeseriesStack() cannot yet handle age ensembles."))
   }
   
   
   plot.df <- plot.df %>%
     dplyr::mutate(scaled = as.numeric(scale(paleoData_values)*scale.factor)) %>%
-    dplyr::filter(is.finite(scaled), is.finite(.data[[time.var]]))
+    dplyr::filter(is.finite(scaled), is.finite(.data[[xvar]]))
   
   if(!is.na(invert.var)){# then make some negative
     iv <- plot.df[[invert.var]]
@@ -453,7 +518,7 @@ plotTimeseriesStack <- function(plot.df,
   axisStats$colors <- colVec[match(axisStats$color.var,levels(axisStats$color.var))]
   
   spag <- ggplot(plot.df) +
-    geom_ridgeline(aes(x = .data[[time.var]],height = scaled, y = paleoData_TSid,color = cv, fill = cv),
+    geom_ridgeline(aes(x = .data[[xvar]],height = scaled, y = paleoData_TSid,color = cv, fill = cv),
                    min_height = -Inf,alpha = fill.alpha,linewidth = line.size)+
     scale_color_manual(name = color.var,values = colVec)+
     scale_fill_manual(name = color.var,values = colVec)+
@@ -477,14 +542,17 @@ plotTimeseriesStack <- function(plot.df,
   
   xrlab <- my.x.range+c(-1 ,1)*abs(diff(my.x.range))*lab.buff*lab.space
   xposLab <- rep(xrlab,times = ceiling(nlines/2))[seq_len(nlines)]
-  if(time.var == "year"){
-    xlabName <- paste0("Year (",plot.df$yearUnits[1],")")
-  }else if(time.var == "age"){
-    xlabName <- paste0("Age (",plot.df$ageUnits[1],")")
-  }else if(time.var == "depth"){
-    xlabName <- paste0("Depth (",plot.df$depth.units[1],")")
+  reverse.x <- FALSE
+  if(!is.null(xScale)){
+    prograde <- identical(xScale$timeDirection, "prograde")
+    xlabName <- paste0(if(prograde) "Year" else "Age", " (", xScale$timeUnits, ")")
+    reverse.x <- !prograde
+  }else if(xvar == "depth" && "depthUnits" %in% names(plot.df)){
+    xlabName <- paste0("Depth (",plot.df$depthUnits[1],")")
+  }else if(paste0(xvar, "Units") %in% names(plot.df)){
+    xlabName <- paste0(xvar, " (", plot.df[[paste0(xvar, "Units")]][1], ")")
   }else{
-    xlabName <- "Unknown"
+    xlabName <- xvar
   }
   
   spag <- spag+annotate(geom = "segment", color = axisStats$colors , x = xpos, xend = xpos, y = ylow, yend  = yhigh)+
@@ -494,7 +562,7 @@ plotTimeseriesStack <- function(plot.df,
     annotate(geom = "text", color = axisStats$colors , x = xposTickLabel, y = yhigh, label = axisStats$axisMax,size = lab.size)+
     annotate(geom = "text", color = axisStats$colors , x = xposLab, y = seq_len(nlines), label = axisStats$axisLabel,size = lab.size,angle = 90)+
     scale_y_discrete(name = NULL,labels = axisStats$dataSetName, expand = c(0.02,-0.75))+
-    scale_x_continuous(name = xlabName, expand = c(0.02,0))
+    (if(reverse.x) scale_x_reverse(name = xlabName, expand = c(0.02,0)) else scale_x_continuous(name = xlabName, expand = c(0.02,0)))
   
   if(length(unique(axisStats$colors))==1){
     spag = spag+theme(legend.position = "none")
@@ -520,8 +588,9 @@ plotTimeseriesStack <- function(plot.df,
 #' @import ggplot2
 #'
 #' @param ts a single timeseries: one element of a TS list, or a one-row timeseries tibble / data frame
-#' @param time.var name of the time variable. NA (default) uses "time" if the timeseries has time values (from `lipdR::extractTs()`), and otherwise "year" if it has year values, and "age" if not.
-#' @param time.units time scale to plot on, e.g. "yr BP", "ka" or "CE". NA (default) keeps the timeseries' own units. Applies when time.var is "time", "age" or "year".
+#' @param time.variable name of the time variable: "time" (the primary time axis), or another time variable such as "age", "year" or "calAge" (see lipdR::tsTimeVariables()). Non-time variables such as "depth" are plotted as they are. NA (default) uses "time" if the timeseries has it, and otherwise "year", then "age".
+#' @param time.units time scale to plot on, e.g. "yr BP", "ka" or "CE". NA (default) keeps the variable's own scale. Applies to time variables.
+#' @param time.var Deprecated; use time.variable.
 #' @param secondary.axis add the other time scale (yr BP or year CE) as a second x axis? (default = FALSE)
 #' @param color line color (default = "black")
 #' @param points also draw a point at each observation? (default = FALSE)
@@ -537,12 +606,15 @@ plotTimeseriesStack <- function(plot.df,
 #' plotTs(tib[1, ], secondary.axis = TRUE)
 #' }
 plotTs <- function(ts,
-                   time.var = NA,
+                   time.variable = NA,
                    time.units = NA,
                    secondary.axis = FALSE,
                    color = "black",
                    points = FALSE,
-                   title = NA){
+                   title = NA,
+                   time.var = NULL){
+
+  time.var <- deprecatedTimeArg(time.var, "time.var", time.variable)
 
   # one row of a data frame -> a list
   if(is.data.frame(ts)){
@@ -569,11 +641,11 @@ plotTs <- function(ts,
     }else if(hasVals(ts[["age"]])){
       time.var <- "age"
     }else{
-      stop("This timeseries has no time, year or age values. Set time.var to the name of its time variable.")
+      stop("This timeseries has no time, year or age values. Set time.variable to the name of its time variable.")
     }
   }
   if(!hasVals(ts[[time.var]])){
-    stop("This timeseries has no values for time.var = '", time.var, "'")
+    stop("This timeseries has no values for time.variable = '", time.var, "'")
   }
 
   vals <- ts[["paleoData_values"]]
@@ -581,19 +653,18 @@ plotTs <- function(ts,
     x <- unlist(x)
     if(length(x) == 0 || is.na(x[1]) || !nzchar(as.character(x[1]))) NA_character_ else as.character(x[1])
   }
-  isTimeVar <- time.var %in% c("time", "age", "year")
+  isTimeVar <- time.var %in% lipdR::tsTimeVariables(ts)
   if(NCOL(ts[[time.var]]) > 1 || NCOL(vals) > 1){
     stop("plotTs() plots a single time axis and a single series. For ensembles, use plotTimeseriesEnsRibbons() or plotTimeseriesEnsLines().")
   }
+  scaleUnits <- NA_character_
   if(isTimeVar){
-    #time, age or year: read (and optionally convert) with its metadata
-    entry <- if(time.var == "time") ts[c("time", "timeUnits", "timeDatum", "timeDirection", "timeExponent")] else ts[c(time.var, paste0(time.var, "Units"))]
-    names(entry) <- if(time.var == "time") c("time", "timeUnits", "timeDatum", "timeDirection", "timeExponent") else c(time.var, paste0(time.var, "Units"))
-    entry <- entry[!vapply(entry, is.null, logical(1))]
-    time <- lipdR::getTsTime(entry, units = time.units, ensemble = FALSE)
-    timeUnits <- attr(time, "timeUnits")
-    if(is.na(time.units) && time.var != "time" && !is.na(first(entry[[paste0(time.var, "Units")]]))){
-      timeUnits <- first(entry[[paste0(time.var, "Units")]]) #keep the record's own label
+    #a time variable: read (and optionally convert) with its time scale
+    time <- lipdR::getTsTime(ts, units = time.units, ensemble = FALSE, variable = time.var)
+    scaleUnits <- attr(time, "timeUnits")
+    timeUnits <- scaleUnits
+    if(is.na(time.units) && time.var != "time" && !is.na(first(ts[[paste0(time.var, "Units")]]))){
+      timeUnits <- first(ts[[paste0(time.var, "Units")]]) #keep the record's own label
     }
   }else{
     time <- ts[[time.var]]
@@ -609,8 +680,8 @@ plotTs <- function(ts,
   df <- df[order(df$time), ]
 
   # labels from metadata
-  isCE <- if(isTimeVar) isProgradeUnits(timeUnits) else (time.var == "year" || grepl("AD|CE", timeUnits))
-  timeName <- if(time.var == "time") (if(isCE) "year" else "age") else time.var
+  isCE <- if(isTimeVar) lipdR::isPrograde(scaleUnits) else (time.var == "year" || grepl("AD|CE", timeUnits))
+  timeName <- if(time.var %in% c("time", "age", "year") && isTimeVar) (if(isCE) "year" else "age") else time.var
   timeLab <- if(is.na(timeUnits)) timeName else paste0(timeName, " (", timeUnits, ")")
   vn <- first(ts[["paleoData_variableName"]])
   if(is.na(vn)) vn <- "value"
@@ -623,7 +694,7 @@ plotTs <- function(ts,
 
   # secondary axis: the other time scale, if this one can be converted
   other <- if(isCE) "yr BP" else "CE"
-  canConvert <- isTimeVar && !inherits(try(lipdR::convertTime(0, from = timeUnits, to = other), silent = TRUE), "try-error")
+  canConvert <- isTimeVar && !inherits(try(lipdR::convertTime(0, from = scaleUnits, to = other), silent = TRUE), "try-error")
   if(secondary.axis && !canConvert){
     warning("Can't add a secondary time axis for ", timeLab, ", so it is left off.")
     secondary.axis <- FALSE
@@ -638,10 +709,10 @@ plotTs <- function(ts,
   }
 
   if(isCE){
-    sec <- if(secondary.axis) sec_axis(~ lipdR::convertTime(., from = timeUnits, to = "yr BP"), name = "age (yr BP)") else waiver()
+    sec <- if(secondary.axis) sec_axis(~ lipdR::convertTime(., from = scaleUnits, to = "yr BP"), name = "age (yr BP)") else waiver()
     p <- p + scale_x_continuous(name = timeLab, sec.axis = sec)
   }else{
-    sec <- if(secondary.axis) sec_axis(~ lipdR::convertTime(., from = timeUnits, to = "CE"), name = "year (CE)") else waiver()
+    sec <- if(secondary.axis) sec_axis(~ lipdR::convertTime(., from = scaleUnits, to = "CE"), name = "year (CE)") else waiver()
     p <- p + scale_x_reverse(name = timeLab, sec.axis = sec)
   }
   return(p)

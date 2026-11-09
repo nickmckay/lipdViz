@@ -124,7 +124,7 @@ test_that("plotTimeAvailabilityTs counts CE and BP records on one scale, from a 
              year = yrs, time = yrs, timeUnits = "yr AD", timeDatum = 0,
              timeDirection = "prograde", timeExponent = 0)
   bp <- list(dataSetName = "bp", paleoData_TSid = "b", archiveType = "LakeSediment", paleoData_values = yrs,
-             age = 1950 - yrs, time = 1950 - yrs, timeUnits = "yr BP", timeDatum = 1950,
+             age = 1950 - yrs, ageUnits = "yr BP", time = 1950 - yrs, timeUnits = "yr BP", timeDatum = 1950,
              timeDirection = "retrograde", timeExponent = 0)
   TS <- structure(list(ce, bp), class = c("lipd_ts", "list"))
   p <- plotTimeAvailabilityTs(TS, step = 10)
@@ -134,10 +134,15 @@ test_that("plotTimeAvailabilityTs counts CE and BP records on one scale, from a 
   pt <- plotTimeAvailabilityTs(lipdR::ts2tibble(TS), step = 10)
   expect_equal(ggplot2::layer_data(pt)$y, d$y)
   pce <- plotTimeAvailabilityTs(TS, step = 10, time.units = "CE")
-  expect_equal(pce$scales$get_scales("x")$name, "year (CE)")
+  expect_equal(pce$scales$get_scales("x")$name, "year (yr AD)")
   expect_equal(pce$scales$get_scales("x")$trans$name, "identity")
-  # old behaviour with an explicit age.var
-  expect_s3_class(plotTimeAvailabilityTs(TS[2], age.var = "age", step = 10), "ggplot")
+  # another time variable, and the deprecated age.var
+  pa <- plotTimeAvailabilityTs(TS[2], time.variable = "age", step = 10)
+  expect_equal(pa$scales$get_scales("x")$name, "age (yr BP)")
+  expect_warning(pd <- plotTimeAvailabilityTs(TS[2], age.var = "age", step = 10), "deprecated")
+  expect_equal(ggplot2::layer_data(pd)$y, ggplot2::layer_data(pa)$y)
+  # records on one shared scale stay on it
+  expect_equal(plotTimeAvailabilityTs(TS[1], step = 10)$scales$get_scales("x")$name, "year (yr AD)")
 })
 
 # plotTs ---------------------------------------------------------------
@@ -192,8 +197,12 @@ test_that("plotTs uses lipdR time metadata, and converts with time.units", {
   expect_equal(sx$trans$name, "reverse")
   expect_equal(range(bp$data$time), c(-0.05, 1.95))
   expect_renders(plotTs(ts, time.units = "ka", secondary.axis = TRUE))
-  # an explicit time.var still works
-  expect_equal(plotTs(ts, time.var = "age")$scales$get_scales("x")$name, "age (BP)")
+  # another time variable, with the record's own label, or converted
+  expect_equal(plotTs(ts, time.variable = "age")$scales$get_scales("x")$name, "age (BP)")
+  expect_equal(plotTs(ts, time.variable = "age", time.units = "CE")$scales$get_scales("x")$name, "year (yr AD)")
+  # the deprecated time.var still works
+  expect_warning(pv <- plotTs(ts, time.var = "age"), "deprecated")
+  expect_equal(pv$scales$get_scales("x")$name, "age (BP)")
 })
 
 test_that("plotTs accepts a one-row tibble", {
@@ -215,4 +224,82 @@ test_that("plotTs gives helpful errors", {
   expect_error(plotTs(ts), "no time, year or age")
   ts <- makeTs(); ts$paleoData_values <- matrix(0, 201, 3)
   expect_error(plotTs(ts), "ensembles")
+})
+
+# time scales on the x axis -----------------------------------------------
+
+makeTimeTs <- function(name, values, units){
+  ce <- lipdR::isPrograde(units)
+  sc <- lipdR::timeScale(units)
+  list(dataSetName = name, paleoData_TSid = name, paleoData_variableName = "d18O",
+       paleoData_units = "permil", archiveType = "LakeSediment",
+       paleoData_values = sin(values / 50),
+       time = values, timeUnits = sc$timeUnits, timeDatum = sc$timeDatum,
+       timeDirection = sc$timeDirection, timeExponent = sc$timeExponent,
+       timeSource = "units", timeVariableName = if(ce) "year" else "age",
+       year = if(ce) values, yearUnits = if(ce) "CE",
+       age = if(!ce) values, ageUnits = if(!ce) units)
+}
+
+test_that("plotTimeseriesStack labels and orients the x axis from the time scale", {
+  bp <- structure(list(makeTimeTs("a", seq(0, 1000, 10), "yr BP"),
+                       makeTimeTs("b", seq(100, 900, 10), "yr BP")), class = c("lipd_ts", "list"))
+  p <- plotTimeseriesStack(bp)
+  sx <- p$scales$get_scales("x")
+  expect_equal(sx$name, "Age (yr BP)")
+  expect_equal(sx$trans$name, "reverse")
+  expect_renders(p)
+
+  ce <- structure(list(makeTimeTs("c", seq(1000, 2000, 10), "CE")), class = c("lipd_ts", "list"))
+  pc <- plotTimeseriesStack(ce)
+  expect_equal(pc$scales$get_scales("x")$name, "Year (yr AD)")
+  expect_equal(pc$scales$get_scales("x")$trans$name, "identity")
+
+  # different scales are put on one, with a message
+  mixed <- structure(c(bp, ce), class = c("lipd_ts", "list"))
+  expect_message(pm <- plotTimeseriesStack(mixed), "different time scales")
+  expect_equal(pm$scales$get_scales("x")$name, "Age (yr BP)")
+  expect_renders(pm)
+  pk <- plotTimeseriesStack(mixed, time.units = "ka")
+  expect_equal(pk$scales$get_scales("x")$name, "Age (ka)")
+  expect_true(max(pk$data$.plotTime) <= 1.001)
+
+  # a timeseries tibble, a long data frame with time, and the deprecated time.var
+  expect_equal(plotTimeseriesStack(lipdR::ts2tibble(bp))$scales$get_scales("x")$name, "Age (yr BP)")
+  long <- lipdR::tidyTs(bp, age.var = "time")
+  pl <- plotTimeseriesStack(long)
+  expect_false(identical(pl$scales$get_scales("x")$name, "Unknown"))
+  expect_equal(pl$scales$get_scales("x")$name, "Age (yr BP)")
+  expect_warning(pv <- plotTimeseriesStack(bp, time.var = "time"), "deprecated")
+  expect_equal(pv$scales$get_scales("x")$name, "Age (yr BP)")
+})
+
+test_that("LiPD-object plots take direction from the time scale, and convert", {
+  Y <- list(values = sin(1:50), variableName = "proxy", units = "unitless")
+  # units that don't say, but a time scale that does
+  X <- list(values = seq(1000, 1980, 20), variableName = "year", units = "yr",
+            timeUnits = "yr AD", timeDatum = 0, timeDirection = "prograde", timeExponent = 0)
+  expect_equal(plotLine(X = X, Y = Y)$scales$get_scales("x")$trans$name, "identity")
+  pb <- plotLine(X = X, Y = Y, time.units = "yr BP")
+  expect_equal(pb$scales$get_scales("x")$trans$name, "reverse")
+  expect_equal(pb$scales$get_scales("x")$name, "year (yr BP)")
+  expect_equal(sort(-range(ggplot2::layer_data(pb)$x)), c(-30, 950)) # a reversed scale negates x
+
+  d <- makeEns()
+  Xe <- list(values = d$time / 1000, variableName = "ageEnsemble", units = "ka")
+  Ye <- list(values = d$vals, variableName = "proxy", units = "unitless")
+  pr <- plotTimeseriesEnsRibbons(X = Xe, Y = Ye, time.units = "CE")
+  expect_null(pr$scales$get_scales("x")) # not reversed
+  expect_true(all(ggplot2::layer_data(pr)$x > 900))
+  expect_renders(pr)
+  pl <- plotTimeseriesEnsLines(X = Xe, Y = Ye, n.ens.plot = 5)
+  expect_equal(pl$scales$get_scales("x")$trans$name, "reverse")
+
+  e <- makeAgeDepthEns()
+  pa <- lipdViz:::plotAgeDepthRibbons(
+    ageEnsemble = list(values = 1950 - e$A, variableName = "yearEnsemble", units = "yr",
+                       timeUnits = "yr AD", timeDatum = 0, timeDirection = "prograde", timeExponent = 0),
+    depth = list(values = e$depth, variableName = "depth", units = "cm"))
+  expect_null(pa$scales$get_scales("x"))
+  expect_error(lipdViz:::convertVarTime(list(values = 1:3, units = "cm", variableName = "depth"), "ka"), "unknown")
 })

@@ -1,3 +1,12 @@
+# lipdViz 0.3.0
+
+Plots use the time scale lipdR (>= 0.8.1) records for every time column, so axis labels and direction come from the data and you can plot on any time axis.
+
+* `plotTs()`, `plotTimeAvailabilityTs()`, `plotSummaryTs()` and `plotTimeseriesStack()` take `time.variable` ("time", the primary time axis, by default; or any other time variable such as "age", "year" or "calAge") and `time.units`. Every record is converted with `lipdR::getTsTime()`. When `time.units` isn't given, the records' own scale is used if they share one, and yr BP otherwise (`lipdR::commonTimeUnits()`). A record whose scale was assumed, or that lacks the time variable, gets one warning per plot, not one per record. `age.var` (in `plotTimeAvailabilityTs()` and `plotSummaryTs()`) and `time.var` (in `plotTs()` and `plotTimeseriesStack()`) still work, with a deprecation warning.
+* `plotTimeseriesStack()` labeled the x axis "Unknown" for `time.var = "time"`. The label and direction now come from the time scale, and axes in yr BP, ka or b2k run right to left, like the other plots. It also takes TS lists and timeseries tibbles on different scales and puts them on one. The depth label used a column that doesn't exist (`depth.units`); it now uses `depthUnits`.
+* `plotLine()`, `plotTimeseriesEnsLines()`, `plotTimeseriesEnsRibbons()`, `plotChron()`, `plotChronEns()` and `plotSummary()` take axis direction from the variable's time scale (the `timeDirection` lipdR adds), falling back to the units as before. `plotLine()`, `plotTimeseriesEnsLines()`, `plotTimeseriesEnsRibbons()` and `plotChronEns()` gain `time.units`, to plot a time variable on another scale.
+* Uses `lipdR::isPrograde()` in place of its own copy.
+
 # lipdViz 0.2.1
 
 * `plotChronEns()` no longer shows a spurious reversal at the ends of an age-depth model. Its ribbons and median are now quantiles of age at each depth of the ensemble table, so they are monotonic whenever the ensemble members are. They used to be quantiles of depth at fixed ages, which is biased near the oldest and youngest ages, where only some ensemble members reach that age; the median could hook back to shallower depths at the base of the core. The `x.bin`, `y.bin` and `n.bins` arguments are now ignored.
