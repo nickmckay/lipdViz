@@ -304,6 +304,64 @@ test_that("LiPD-object plots take direction from the time scale, and convert", {
   expect_error(lipdViz:::convertVarTime(list(values = 1:3, units = "cm", variableName = "depth"), "ka"), "unknown")
 })
 
+makeChronLipd <- function(){
+  e <- makeAgeDepthEns()
+  dist <- function(depth, mu){
+    age <- seq(mu - 100, mu + 100, by = 5)
+    list(depth = depth,
+         age = list(values = age, units = "yr BP", variableName = "age"),
+         probabilityDensity = list(values = stats::dnorm(age, mu, 30), units = "unitless",
+                                   variableName = "probabilityDensity"))
+  }
+  L <- list(dataSetName = "chronTest",
+            chronData = list(list(model = list(list(
+              ensembleTable = list(list(
+                depth = list(values = e$depth, units = "cm", variableName = "depth"),
+                ageEnsemble = list(values = e$A, units = "yr BP", variableName = "ageEnsemble"))),
+              distributionTable = list(dist(100, 500), dist(400, 3000)))))))
+  lipdR::addTimeScales(L)
+}
+
+test_that("plotChronEns converts the model's age distributions with time.units", {
+  L <- makeChronLipd()
+  expect_equal(L$chronData[[1]]$model[[1]]$distributionTable[[1]]$age$timeUnits, "yr BP")
+  distx <- function(p){
+    isDist <- vapply(p$layers, function(l) inherits(l$geom, "GeomRibbon") && "ymin" %in% names(l$mapping), logical(1))
+    lapply(which(isDist), function(i) ggplot2::layer_data(p, i))
+  }
+  invisible(capture.output(p0 <- plotChronEns(L, n.ens.plot = 3)))
+  d0 <- distx(p0)
+  expect_length(d0, 2)
+  # yr BP axis is reversed, so ggplot stores -x
+  expect_equal(sort(-range(d0[[1]]$x)), c(400, 600))
+
+  expect_no_message(invisible(capture.output(pc <- plotChronEns(L, n.ens.plot = 3, time.units = "yr CE"))),
+                    message = "left off")
+  dc <- distx(pc)
+  expect_length(dc, 2)
+  expect_null(pc$scales$get_scales("x")) # prograde CE axis runs forward
+  expect_equal(range(dc[[1]]$x), c(1350, 1550))
+  expect_equal(range(dc[[2]]$x), c(-1150, -950))
+  # the distribution sits at its depth, with the same shape as on the yr BP axis
+  expect_equal(range(dc[[1]]$y), range(d0[[1]]$y))
+  expect_equal(dc[[1]]$ymax - dc[[1]]$ymin, rev(d0[[1]]$ymax - d0[[1]]$ymin))
+  expect_renders(pc)
+
+  invisible(capture.output(pk <- plotChronEns(L, n.ens.plot = 3, time.units = "ka")))
+  dk <- distx(pk)
+  expect_equal(sort(-range(dk[[2]]$x)), c(2.9, 3.1))
+  expect_equal(dk[[2]]$ymax - dk[[2]]$ymin, distx(p0)[[2]]$ymax - distx(p0)[[2]]$ymin)
+
+  # an age column without units takes the ensemble's scale
+  L2 <- L
+  d1 <- L2$chronData[[1]]$model[[1]]$distributionTable[[1]]
+  d1$age <- list(values = d1$age$values, variableName = "calAge")
+  names(d1)[names(d1) == "age"] <- "calAge"
+  L2$chronData[[1]]$model[[1]]$distributionTable[[1]] <- d1
+  invisible(capture.output(p2 <- plotChronEns(L2, n.ens.plot = 3, time.units = "CE")))
+  expect_equal(range(distx(p2)[[1]]$x), c(1350, 1550))
+})
+
 test_that("plotTimeseriesStack on tidyTs() output uses the unchopped time column", {
   ts <- list(
     list(dataSetName = "a", paleoData_TSid = "a1", paleoData_variableName = "x", paleoData_units = "u",

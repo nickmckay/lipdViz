@@ -78,7 +78,7 @@ plotSummary(
     \item{\code{meas.num}}{which measurement Table for the paleoData age-depth}
     \item{\code{color.line.paleo}}{line color of the paleoData age-depth (following ggplot rules)}
     \item{\code{plot.traces}}{Add timeseries lines to the plot (default = TRUE)}
-    \item{\code{time.units}}{convert the age ensemble to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale.}
+    \item{\code{time.units}}{convert the age ensemble, and the model's age distributions, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps their own scale.}
   }}
 }
 \value{
