@@ -16,7 +16,7 @@ plotSummaryTs(
 )
 }
 \arguments{
-\item{TS}{LiPD timeseries object See \url{http://nickmckay.github.io/LiPD-utilities/r/index.html#what-is-a-time-series}}
+\item{TS}{LiPD timeseries object (a TS list from lipdR::extractTs(), or a timeseries tibble from lipdR::ts2tibble())}
 
 \item{sort.var}{What variable in the TS should the map and histogram be organized by? (default = "archiveType)}
 

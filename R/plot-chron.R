@@ -139,6 +139,8 @@ plotSummary = function(L,
 #' @param scale.frac controls the vertical span of the probability distribution. Approximately the vertical fraction of the plot that the distribution will cover. 
 #' @param add.to.plot A ggplot object to add this plot to. Default is ggplot()
 #' @param alp transparency, from 0 to 1
+#' @param time.units convert the distributions' ages to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps their own scale.
+#' @param fallback.scale time scale (a units string or a `lipdR::timeScale()` list) to assume for a distribution whose age column has no time scale of its own. Only used with `time.units`. NULL (default) means such a distribution can't be converted, which is an error.
 #' @return A ggplot object
 plotModelDistributions = function(L,
                                   dist.var = "age",
@@ -153,7 +155,9 @@ plotModelDistributions = function(L,
                                   dist.plot = NA,
                                   dist.type = "violin",
                                   thick = 0.1,
-                                  truncate.dist = NA){
+                                  truncate.dist = NA,
+                                  time.units = NA,
+                                  fallback.scale = NULL){
   
   
   P = L[[paste0(mode,"Data")]]
@@ -202,23 +206,17 @@ plotModelDistributions = function(L,
   # get range and scale
   plot.range =range(ally,na.rm = T)
   
-  #guess at the scaler...
-  this.dist = dist[[dist.plot[[1]]]]
-  if(!any(is.na(truncate.dist))){
-    tgood = which(this.dist$probabilityDensity$values > truncate.dist)
-    this.dist$probabilityDensity$values = this.dist$probabilityDensity$values[tgood]
-    this.dist$age$values = this.dist$age$values[tgood]
-  }
-  
-  
   #loop through individual ages...
   for(y in dist.plot){
-    this.dist = dist[[y]]
+    this.dist = distributionOnTimeAxis(dist[[y]], dist.var = dist.var, time.units = time.units, fallback.scale = fallback.scale)
     if(!is.na(truncate.dist)){
       tgood = which(this.dist$probabilityDensity$values > truncate.dist)
       this.dist$probabilityDensity$values = this.dist$probabilityDensity$values[tgood]
-      this.dist$age$values = this.dist$age$values[tgood]
+      this.dist[[dist.var]]$values = this.dist[[dist.var]]$values[tgood]
     }
+    #the density is normalized to sum to one and then scaled to its maximum, so
+    #its height on the plot doesn't depend on the units of the age axis: a
+    #change of units (yr to ka) needs no rescaling of the density.
     pd = this.dist$probabilityDensity$values/sum(this.dist$probabilityDensity$values,na.rm=T)
     scaler = scale.frac*abs(diff(plot.range))/max(pd)
     pd = pd * scaler
@@ -229,6 +227,45 @@ plotModelDistributions = function(L,
   }
   add.to.plot = add.to.plot + geoChronRPlotTheme()
   return(add.to.plot)
+}
+
+
+#' @title Put one model distribution on a time axis
+#' @description Converts the age column of one distribution (one element of a
+#'   model's distributionTable) to `time.units`, using the time scale lipdR
+#'   records for the column (or its units). Only the ages move: the density is
+#'   drawn normalized, so it needs no rescaling when the units change magnitude.
+#' @param this.dist one distribution: a list of columns (the age column and
+#'   probabilityDensity) plus a scalar depth
+#' @param dist.var name of the age column. If it isn't there, the first column
+#'   other than probabilityDensity that has a time scale is used, and stored
+#'   under this name.
+#' @inheritParams plotModelDistributions
+#' @return this.dist, with its age column on the requested time scale
+#' @keywords internal
+distributionOnTimeAxis <- function(this.dist, dist.var = "age", time.units = NA, fallback.scale = NULL){
+  col <- this.dist[[dist.var]]
+  if(!is.list(col)){
+    cands <- names(this.dist)[vapply(this.dist, function(x) is.list(x) && !is.null(x$values), logical(1))]
+    cands <- setdiff(cands, c("probabilityDensity", "density", "depth"))
+    timed <- cands[vapply(cands, function(n) !is.null(varTimeScale(this.dist[[n]])), logical(1))]
+    pick <- if(length(timed) > 0) timed[1] else if(length(cands) == 1) cands else NULL
+    if(is.null(pick)){
+      stop("Couldn't find the age column (\"", dist.var, "\") in this distribution.", call. = FALSE)
+    }
+    this.dist[[dist.var]] <- this.dist[[pick]]
+    col <- this.dist[[dist.var]]
+  }
+  if(length(time.units) == 0 || all(is.na(time.units))){
+    return(this.dist)
+  }
+  if(is.null(varTimeScale(col)) && !is.null(fallback.scale)){
+    sc <- if(is.character(fallback.scale)) lipdR::timeScale(fallback.scale) else fallback.scale
+    col[c("timeUnits", "timeDatum", "timeDirection", "timeExponent")] <-
+      sc[c("timeUnits", "timeDatum", "timeDirection", "timeExponent")]
+  }
+  this.dist[[dist.var]] <- convertVarTime(col, time.units)
+  this.dist
 }
 
 
@@ -472,7 +509,7 @@ plotChron <- function(L,
 #' @param meas.num which measurement Table for the paleoData age-depth
 #' @param color.line.paleo line color of the paleoData age-depth (following ggplot rules)
 #' @param plot.traces Add timeseries lines to the plot (default = TRUE)
-#' @param time.units convert the age ensemble to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale.
+#' @param time.units convert the age ensemble, and the model's age distributions, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps their own scale.
 #' @return A ggplot object
 plotChronEns = function(L,
                         age.var = "ageEnsemble",
@@ -575,8 +612,9 @@ plotChronEns = function(L,
   #quick fix to ensemble list bug
   ageEnsemble$values = as.matrix(as.data.frame(ageEnsemble$values))
 
-  #optionally put the ensemble on another time scale
-  converted <- !(length(time.units) == 0 || all(is.na(time.units)))
+  #optionally put the ensemble on another time scale. Keep its own scale, for
+  #distributions whose age column doesn't state one.
+  ensScale <- varTimeScale(ageEnsemble)
   ageEnsemble <- convertVarTime(ageEnsemble, time.units)
   
   print("plotting your chron ensemble. This make take a few seconds...")
@@ -592,10 +630,8 @@ plotChronEns = function(L,
   }
   
   #distributions last
-  if(is.list(C[[chron.number]]$model[[model.num]]$distributionTable) && converted){
-    message("The model's age distributions are not converted to ", time.units, ", so they are left off.")
-  }else if(is.list(C[[chron.number]]$model[[model.num]]$distributionTable)){#if it exists. Add it.
-    chronPlot = plotModelDistributions(L,paleo.or.chron.num = chron.number,model.num = model.num,add.to.plot = chronPlot,alp=dist.alp,color = dist.color,dist.type = dist.type,thick = dist.thick,scale.frac = dist.scale,truncate.dist = truncate.dist)
+  if(is.list(C[[chron.number]]$model[[model.num]]$distributionTable)){#if it exists. Add it, on the ensemble's time axis.
+    chronPlot = plotModelDistributions(L,paleo.or.chron.num = chron.number,model.num = model.num,add.to.plot = chronPlot,alp=dist.alp,color = dist.color,dist.type = dist.type,thick = dist.thick,scale.frac = dist.scale,truncate.dist = truncate.dist,time.units = time.units,fallback.scale = ensScale)
   }
   
   

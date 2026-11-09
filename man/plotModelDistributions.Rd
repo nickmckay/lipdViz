@@ -18,7 +18,9 @@ plotModelDistributions(
   dist.plot = NA,
   dist.type = "violin",
   thick = 0.1,
-  truncate.dist = NA
+  truncate.dist = NA,
+  time.units = NA,
+  fallback.scale = NULL
 )
 }
 \arguments{
@@ -49,6 +51,10 @@ plotModelDistributions(
 \item{thick}{thickness of the line around the distribution}
 
 \item{truncate.dist}{truncate probability density values below this number. NA (default) means no truncation}
+
+\item{time.units}{convert the distributions' ages to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps their own scale.}
+
+\item{fallback.scale}{time scale (a units string or a `lipdR::timeScale()` list) to assume for a distribution whose age column has no time scale of its own. Only used with `time.units`. NULL (default) means such a distribution can't be converted, which is an error.}
 }
 \value{
 A ggplot object

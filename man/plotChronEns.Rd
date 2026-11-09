@@ -96,7 +96,7 @@ plotChronEns(
 
 \item{plot.traces}{Add timeseries lines to the plot (default = TRUE)}
 
-\item{time.units}{convert the age ensemble to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale.}
+\item{time.units}{convert the age ensemble, and the model's age distributions, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps their own scale.}
 }
 \value{
 A ggplot object
