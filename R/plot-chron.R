@@ -425,7 +425,7 @@ plotChron <- function(L,
       geoChronRPlotTheme() +  theme(legend.position = legend.position) +
       ggtitle(paste0(L$dataSetName,": chronData ", as.character(chron.number), " - measurementTable ", as.character(meas.num)))
     
-    if(any(grepl("AD",age$units)) | any(grepl("CE",age$units))){
+    if(!isReversedTimeAxis(age, fallback = !(any(grepl("AD",age$units)) | any(grepl("CE",age$units))))){
       chronPlot <- chronPlot + scale_x_continuous(name = axisLabel(age))
     }else{
       chronPlot <- chronPlot + scale_x_reverse(name = axisLabel(age))
@@ -472,6 +472,7 @@ plotChron <- function(L,
 #' @param meas.num which measurement Table for the paleoData age-depth
 #' @param color.line.paleo line color of the paleoData age-depth (following ggplot rules)
 #' @param plot.traces Add timeseries lines to the plot (default = TRUE)
+#' @param time.units convert the age ensemble to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale.
 #' @return A ggplot object
 plotChronEns = function(L,
                         age.var = "ageEnsemble",
@@ -501,7 +502,8 @@ plotChronEns = function(L,
                         paleo.number = NA, 
                         meas.num = NA,
                         color.line.paleo = "cyan",
-                        plot.traces = TRUE){
+                        plot.traces = TRUE,
+                        time.units = NA){
   
   C = L$chronData
   if(any(is.na(chron.number))){
@@ -572,6 +574,10 @@ plotChronEns = function(L,
   
   #quick fix to ensemble list bug
   ageEnsemble$values = as.matrix(as.data.frame(ageEnsemble$values))
+
+  #optionally put the ensemble on another time scale
+  converted <- !(length(time.units) == 0 || all(is.na(time.units)))
+  ageEnsemble <- convertVarTime(ageEnsemble, time.units)
   
   print("plotting your chron ensemble. This make take a few seconds...")
   
@@ -586,7 +592,9 @@ plotChronEns = function(L,
   }
   
   #distributions last
-  if(is.list(C[[chron.number]]$model[[model.num]]$distributionTable)){#if it exists. Add it.
+  if(is.list(C[[chron.number]]$model[[model.num]]$distributionTable) && converted){
+    message("The model's age distributions are not converted to ", time.units, ", so they are left off.")
+  }else if(is.list(C[[chron.number]]$model[[model.num]]$distributionTable)){#if it exists. Add it.
     chronPlot = plotModelDistributions(L,paleo.or.chron.num = chron.number,model.num = model.num,add.to.plot = chronPlot,alp=dist.alp,color = dist.color,dist.type = dist.type,thick = dist.thick,scale.frac = dist.scale,truncate.dist = truncate.dist)
   }
   
@@ -705,7 +713,7 @@ plotAgeDepthRibbons <- function(add.to.plot = ggplot(),
   }
 
   p <- p + xlab(axisLabel(ageEnsemble)) + ylab(axisLabel(depth))
-  if(grepl("BP|ka|B2k|kyr", axisLabel(ageEnsemble))){
+  if(isReversedTimeAxis(ageEnsemble, fallback = grepl("BP|ka|B2k|kyr", axisLabel(ageEnsemble)))){
     p <- p + scale_x_reverse(axisLabel(ageEnsemble))
   }
   return(p)

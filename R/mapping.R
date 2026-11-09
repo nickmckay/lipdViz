@@ -5,16 +5,19 @@
 #' @inheritParams ens::binTs
 #' @param sort.var What variable in the TS should the map and histogram be organized by? (default = "archiveType)
 #' @param age.range a two element vector that includes the range over which you want to count (default = NA, which calculates the full range in the TS)
-#' @param age.var What time variable should be used. The default, "time", uses each record's time axis converted to `time.units`, so records in year CE and yr BP can be shown together. Any other name (e.g. "age") is used as it is.
+#' @param time.variable Which time variable to use: "time" (default), each record's primary time axis, or the name of another time variable, such as "age" or "year". Every record's values are converted to `time.units` with lipdR::getTsTime(), so records in year CE and yr BP are shown together.
 #' @param step What step size should be used along the age axis? (default = NA, which will calculate 0.5\% of the age.range)
-#' @param time.units the time scale to plot on when age.var = "time" (default = "yr BP"). age.range and step are in these units.
+#' @param time.units the time scale to plot on, e.g. "yr BP", "ka" or "CE". NULL (default) uses the records' own scale if they share one, and yr BP otherwise. age.range and step are in these units.
+#' @param age.var Deprecated; use time.variable.
 #' @inheritDotParams mapTs
 #' @importFrom gridExtra grid.arrange
 #' @return a gridExtra ggplot output
 #' @export
 #' @family plot
-plotSummaryTs <- function(TS,sort.var = "archiveType", age.range = NA, age.var = "time", step = NA, time.units = "yr BP",... ){
+plotSummaryTs <- function(TS,sort.var = "archiveType", age.range = NA, time.variable = "time", step = NA, time.units = NULL, age.var = NULL,... ){
   
+  time.variable <- deprecatedTimeArg(age.var, "age.var", time.variable)
+
   #a timeseries tibble or data frame works too
   if(is.data.frame(TS)){
     TS <- lipdR::as.lipdTs(TS)
@@ -24,7 +27,7 @@ plotSummaryTs <- function(TS,sort.var = "archiveType", age.range = NA, age.var =
   tsMap <- mapTs(TS,color = sort.var,...)
   
   #make a time availability plot
-  ta <- plotTimeAvailabilityTs(TS,age.range = age.range, age.var = age.var, group.var = sort.var, step = step, time.units = time.units)+theme(legend.position = "none")
+  ta <- plotTimeAvailabilityTs(TS,age.range = age.range, time.variable = time.variable, group.var = sort.var, step = step, time.units = time.units)+theme(legend.position = "none")
   
   #define the layout
   lay <- rbind(c(1,1,1),
@@ -43,8 +46,9 @@ plotSummaryTs <- function(TS,sort.var = "archiveType", age.range = NA, age.var =
 #' @title Create a Time availability plot
 #' @param TS a lipd TS object, or a timeseries tibble. This should probably be filtered to show just records you're interested in, as all we counted
 #' @param age.range a two element vector that includes the range over which you want to count (default = NA, which calculates the full range in the TS)
-#' @param age.var What time variable should be used. The default, "time", uses each record's time axis converted to `time.units` with lipdR::getTsTime(), so records in year CE and yr BP are counted on one scale. Any other name (e.g. "age" or "year") is used as it is.
-#' @param time.units the time scale to count on when age.var = "time" (default = "yr BP"). age.range and step are in these units.
+#' @param time.variable Which time variable to use: "time" (default), each record's primary time axis, or the name of another time variable, such as "age" or "year". Every record's values are converted to `time.units` with lipdR::getTsTime(), so records in year CE and yr BP are counted on one scale.
+#' @param time.units the time scale to count on, e.g. "yr BP", "ka" or "CE". NULL (default) uses the records' own scale if they share one, and yr BP otherwise. age.range and step are in these units.
+#' @param age.var Deprecated; use time.variable.
 #' @param group.var What variable Should be used to Group the counts? (default = "archiveType")
 #' @param step What step size should be used along the age axis? (default = NA, which will calculate 0.5\% of the age.range)
 #' @import ggplot2 tidyr
@@ -53,26 +57,31 @@ plotSummaryTs <- function(TS,sort.var = "archiveType", age.range = NA, age.var =
 #' @export
 plotTimeAvailabilityTs <- function(TS,
                                    age.range = NA,
-                                   age.var = "time",
+                                   time.variable = "time",
                                    group.var = "archiveType",
                                    step = NA,
-                                   time.units = "yr BP"){ 
+                                   time.units = NULL,
+                                   age.var = NULL){ 
   
+  time.variable <- deprecatedTimeArg(age.var, "age.var", time.variable)
+
   #a timeseries tibble or data frame works too
   if(is.data.frame(TS)){
     TS <- lipdR::as.lipdTs(TS)
   }
 
   #put every record on the same time scale
-  axis.name <- age.var
-  reverse.axis <- grepl("age",age.var,ignore.case = T)
-  if(identical(age.var, "time")){
-    TS <- addPlotTime(TS, time.units)
-    age.var <- ".plotTime"
-    prograde <- isProgradeUnits(time.units)
-    axis.name <- paste0(if(prograde) "year" else "age", " (", time.units, ")")
-    reverse.axis <- !prograde
+  if(is.null(time.units) || all(is.na(time.units))){
+    time.units <- lipdR::commonTimeUnits(TS, variable = time.variable)
   }
+  TS <- addPlotTime(TS, time.units, time.variable)
+  if(length(TS) == 0){
+    stop("None of the timeseries have '", time.variable, "' values.")
+  }
+  age.var <- ".plotTime"
+  prograde <- lipdR::isPrograde(time.units)
+  axis.name <- paste0(if(prograde) "year" else "age", " (", lipdR::timeScale(time.units)$timeUnits, ")")
+  reverse.axis <- !prograde
   #estimate age range
   if(any(is.na(age.range))){
     age.range <- c(min(purrr::map_dbl(TS,function(x) min(x[[age.var]],na.rm = TRUE))),
@@ -530,35 +539,38 @@ baseMap = function(lon,
 
 #' Add each record's time, on one scale, for plotting
 #'
-#' Records without any time axis get NA, with a warning, so they are left out.
+#' Records without the time variable are left out, with one warning; so is
+#' one warning for records whose time scale was assumed.
 #' @param TS a TS list
 #' @param time.units the target time scale
-#' @return TS with a `.plotTime` field on every record
+#' @param time.variable the time variable to use (default = "time")
+#' @return TS, without records lacking time, with a `.plotTime` field on every record
 #' @keywords internal
-addPlotTime <- function(TS, time.units){
-  missing <- character(0)
+addPlotTime <- function(TS, time.units, time.variable = "time"){
+  tms <- lipdR::getTsTimes(TS, units = time.units, variable = time.variable, ensemble = FALSE)
+  keep <- !vapply(tms, is.null, logical(1))
+  TS <- TS[keep]
+  tms <- tms[keep]
   for(i in seq_along(TS)){
-    tm <- tryCatch(lipdR::getTsTime(TS[[i]], units = time.units, ensemble = FALSE),
-                   error = function(e){
-                     missing <<- c(missing, TS[[i]]$paleoData_TSid %||% TS[[i]]$dataSetName %||% as.character(i))
-                     NA_real_
-                   })
-    attr(tm, "timeUnits") <- NULL
-    TS[[i]]$.plotTime <- as.numeric(tm)
-  }
-  if(length(missing) > 0){
-    warning("No usable time axis for ", length(missing), " timeseries, which are left out: ", paste(missing, collapse = ", "))
+    TS[[i]]$.plotTime <- as.numeric(tms[[i]])
   }
   TS
 }
 
-`%||%` <- function(x, y){
-  if(is.null(x)) y else x
+#' Handle a deprecated time argument
+#' @param old the value of the deprecated argument (NULL if not given)
+#' @param old.name its name
+#' @param new the value of its replacement
+#' @return the value to use
+#' @keywords internal
+deprecatedTimeArg <- function(old, old.name, new){
+  if(is.null(old)){
+    return(new)
+  }
+  warning("'", old.name, "' is deprecated; use 'time.variable' instead.", call. = FALSE)
+  old
 }
 
-# Does a time scale count forward (year CE) rather than back (yr BP, ka)?
-isProgradeUnits <- function(units){
-  !is.null(units) && length(units) == 1 && !is.na(units) &&
-    grepl("\\b(AD|CE)\\b", units, ignore.case = TRUE) &&
-    !grepl("\\bBC", units, ignore.case = TRUE)
+`%||%` <- function(x, y){
+  if(is.null(x)) y else x
 }

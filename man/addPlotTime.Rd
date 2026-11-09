@@ -4,17 +4,20 @@
 \alias{addPlotTime}
 \title{Add each record's time, on one scale, for plotting}
 \usage{
-addPlotTime(TS, time.units)
+addPlotTime(TS, time.units, time.variable = "time")
 }
 \arguments{
 \item{TS}{a TS list}
 
 \item{time.units}{the target time scale}
+
+\item{time.variable}{the time variable to use (default = "time")}
 }
 \value{
-TS with a `.plotTime` field on every record
+TS, without records lacking time, with a `.plotTime` field on every record
 }
 \description{
-Records without any time axis get NA, with a warning, so they are left out.
+Records without the time variable are left out, with one warning; so is
+one warning for records whose time scale was assumed.
 }
 \keyword{internal}

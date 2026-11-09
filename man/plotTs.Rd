@@ -6,20 +6,21 @@
 \usage{
 plotTs(
   ts,
-  time.var = NA,
+  time.variable = NA,
   time.units = NA,
   secondary.axis = FALSE,
   color = "black",
   points = FALSE,
-  title = NA
+  title = NA,
+  time.var = NULL
 )
 }
 \arguments{
 \item{ts}{a single timeseries: one element of a TS list, or a one-row timeseries tibble / data frame}
 
-\item{time.var}{name of the time variable. NA (default) uses "time" if the timeseries has time values (from `lipdR::extractTs()`), and otherwise "year" if it has year values, and "age" if not.}
+\item{time.variable}{name of the time variable: "time" (the primary time axis), or another time variable such as "age", "year" or "calAge" (see lipdR::tsTimeVariables()). Non-time variables such as "depth" are plotted as they are. NA (default) uses "time" if the timeseries has it, and otherwise "year", then "age".}
 
-\item{time.units}{time scale to plot on, e.g. "yr BP", "ka" or "CE". NA (default) keeps the timeseries' own units. Applies when time.var is "time", "age" or "year".}
+\item{time.units}{time scale to plot on, e.g. "yr BP", "ka" or "CE". NA (default) keeps the variable's own scale. Applies to time variables.}
 
 \item{secondary.axis}{add the other time scale (yr BP or year CE) as a second x axis? (default = FALSE)}
 
@@ -28,6 +29,8 @@ plotTs(
 \item{points}{also draw a point at each observation? (default = FALSE)}
 
 \item{title}{plot title. NA (default) uses the dataset name. Use NULL for no title.}
+
+\item{time.var}{Deprecated; use time.variable.}
 }
 \value{
 a ggplot object

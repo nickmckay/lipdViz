@@ -30,6 +30,7 @@ plotScreeEns(pcaout, null.color = "red", null.significance = 0.05, ...)
     \item{\code{alp}}{alpha (transparency) parameter for the ribbons}
     \item{\code{add.to.plot}}{A ggplot object to add this plot to. Default is ggplot() .}
     \item{\code{export.quantiles}}{If TRUE, return the plotted quantiles rather than the plot}
+    \item{\code{time.units}}{convert X, a time variable, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale. Uses the time scale lipdR records on the column.}
   }}
 }
 \value{

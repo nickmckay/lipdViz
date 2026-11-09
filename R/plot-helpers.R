@@ -327,3 +327,77 @@ axisLabel = function(varList){
   return(paste0(vn," (",un,")"))
   
 }
+
+#' The time scale of a LiPD variable list
+#'
+#' Uses the time scale fields lipdR adds to every time column (timeDatum,
+#' timeDirection, timeExponent, timeUnits), and otherwise the units.
+#' @param varList a LiPD variable list (e.g. from selectData())
+#' @return a lipdR::timeScale() list, or NULL if it isn't on a time scale
+#' @keywords internal
+varTimeScale <- function(varList){
+  if(!is.list(varList)){
+    return(NULL)
+  }
+  fields <- c("timeUnits", "timeDatum", "timeDirection", "timeExponent")
+  has <- vapply(fields, function(f) !is.null(varList[[f]]) && length(varList[[f]]) > 0, logical(1))
+  if(all(has[-1]) || has[1]){
+    sc <- tryCatch(lipdR::timeScale(varList[fields[has]]), error = function(e) NULL)
+    if(!is.null(sc)){
+      return(sc)
+    }
+  }
+  u <- varList[["units"]]
+  if(is.null(u) || length(u) == 0 || is.na(u[1])){
+    return(NULL)
+  }
+  u <- as.character(u[1])
+  if(grepl("14C", u, ignore.case = TRUE)){
+    return(NULL)
+  }
+  if(!grepl("\\b(AD|CE|BP|BCE|BC|b2k|ka|kyr|Ma|Myr)\\b", u, ignore.case = TRUE)){
+    return(NULL)
+  }
+  tryCatch(lipdR::timeScale(u), error = function(e) NULL)
+}
+
+#' Should a time axis be reversed?
+#'
+#' TRUE for time scales that count back (yr BP, ka, b2k), so time runs left
+#' to right. For a variable without a time scale, `fallback` is returned.
+#' @param varList a LiPD variable list
+#' @param fallback what to return when the variable has no time scale
+#' @return logical
+#' @keywords internal
+isReversedTimeAxis <- function(varList, fallback = FALSE){
+  sc <- varTimeScale(varList)
+  if(is.null(sc)){
+    return(fallback)
+  }
+  !identical(sc$timeDirection, "prograde")
+}
+
+#' Convert a LiPD time variable to another time scale
+#'
+#' @param varList a LiPD variable list with a time scale
+#' @param time.units the target scale (e.g. "yr BP", "ka", "CE"). NA leaves it as it is.
+#' @return varList with converted values, and units and time scale fields updated
+#' @keywords internal
+convertVarTime <- function(varList, time.units){
+  if(length(time.units) == 0 || all(is.na(time.units)) || !is.list(varList)){
+    return(varList)
+  }
+  sc <- varTimeScale(varList)
+  if(is.null(sc)){
+    stop("Can't convert ", varList[["variableName"]] %||% "this variable", " to ", time.units,
+         ": its time scale is unknown (units: ", varList[["units"]] %||% "none", ").", call. = FALSE)
+  }
+  to <- lipdR::timeScale(time.units)
+  varList[["values"]] <- lipdR::convertTime(varList[["values"]], from = sc, to = to)
+  varList[["units"]] <- to$timeUnits
+  varList[["timeUnits"]] <- to$timeUnits
+  varList[["timeDatum"]] <- to$timeDatum
+  varList[["timeDirection"]] <- to$timeDirection
+  varList[["timeExponent"]] <- to$timeExponent
+  varList
+}

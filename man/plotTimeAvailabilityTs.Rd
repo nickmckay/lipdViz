@@ -7,10 +7,11 @@
 plotTimeAvailabilityTs(
   TS,
   age.range = NA,
-  age.var = "time",
+  time.variable = "time",
   group.var = "archiveType",
   step = NA,
-  time.units = "yr BP"
+  time.units = NULL,
+  age.var = NULL
 )
 }
 \arguments{
@@ -18,13 +19,15 @@ plotTimeAvailabilityTs(
 
 \item{age.range}{a two element vector that includes the range over which you want to count (default = NA, which calculates the full range in the TS)}
 
-\item{age.var}{What time variable should be used. The default, "time", uses each record's time axis converted to `time.units` with lipdR::getTsTime(), so records in year CE and yr BP are counted on one scale. Any other name (e.g. "age" or "year") is used as it is.}
+\item{time.variable}{Which time variable to use: "time" (default), each record's primary time axis, or the name of another time variable, such as "age" or "year". Every record's values are converted to `time.units` with lipdR::getTsTime(), so records in year CE and yr BP are counted on one scale.}
 
 \item{group.var}{What variable Should be used to Group the counts? (default = "archiveType")}
 
 \item{step}{What step size should be used along the age axis? (default = NA, which will calculate 0.5\% of the age.range)}
 
-\item{time.units}{the time scale to count on when age.var = "time" (default = "yr BP"). age.range and step are in these units.}
+\item{time.units}{the time scale to count on, e.g. "yr BP", "ka" or "CE". NULL (default) uses the records' own scale if they share one, and yr BP otherwise. age.range and step are in these units.}
+
+\item{age.var}{Deprecated; use time.variable.}
 }
 \value{
 a ggplot object

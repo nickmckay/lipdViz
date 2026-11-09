@@ -4,7 +4,14 @@
 \alias{plotLine}
 \title{Plot or add a line to plot}
 \usage{
-plotLine(add.to.plot = ggplot(), X, Y, color = "black", alp = 1)
+plotLine(
+  add.to.plot = ggplot(),
+  X,
+  Y,
+  color = "black",
+  alp = 1,
+  time.units = NA
+)
 }
 \arguments{
 \item{add.to.plot}{A ggplot object to add these lines to. Default is ggplot() .}
@@ -16,6 +23,8 @@ plotLine(add.to.plot = ggplot(), X, Y, color = "black", alp = 1)
 \item{color}{Line color (following ggplot rules)}
 
 \item{alp}{Line transparency}
+
+\item{time.units}{convert X, a time variable, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale. Uses the time scale lipdR records on the column.}
 }
 \value{
 A ggplot object

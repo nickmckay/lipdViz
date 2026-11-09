@@ -6,7 +6,7 @@
 \usage{
 plotTimeseriesStack(
   plot.df,
-  time.var = "year",
+  time.variable = NA,
   color.var = "paleoData_TSid",
   invert.var = NA,
   fill.alpha = 0.2,
@@ -16,13 +16,15 @@ plotTimeseriesStack(
   lab.buff = 0.02,
   lab.size = 3,
   lab.space = 2,
-  color.ramp = NA
+  color.ramp = NA,
+  time.units = NULL,
+  time.var = NULL
 )
 }
 \arguments{
 \item{plot.df}{A tidy data.frame, typically the output of tidyTs()}
 
-\item{time.var}{Which variable to put on the x-axis. Must be in plot.df. Typically "year", "age", or "depth"}
+\item{time.variable}{Which variable to put on the x-axis. For a TS list or timeseries tibble, "time" (the default for those) uses each record's primary time axis, and any other time variable ("age", "year", ...) works too; every record is converted to `time.units`. For a long, tidy data.frame it must be a column: NA (default) uses "time", then "year", then "age". Non-time variables such as "depth" are plotted as they are.}
 
 \item{color.var}{Which variable to color the timeseries by. The default ("paleoData_TSid") will give each timeseries it's own color. Common other options include "paleoData_variable", "archiveType", or "paleoData_units", but any variable in plot.df should work.}
 
@@ -43,6 +45,10 @@ plotTimeseriesStack(
 \item{lab.space}{Multiplier on lab.buff for the axis label separation from the y-scale}
 
 \item{color.ramp}{Specify the colors to use in the plot arranged along color.var. You can do this as single color as a character that will be repeated, as a vector of characters, or a function that creates colors given nColors input  (default = NA, which becomes RColorBrewer::brewer.pal(nColors,"Dark2"))}
+
+\item{time.units}{the time scale to plot on, e.g. "yr BP", "ka" or "CE". NULL (default) uses the records' own scale if they share one, and yr BP otherwise. Axes in yr BP, ka or b2k run right to left, so time runs left to right.}
+
+\item{time.var}{Deprecated; use time.variable.}
 }
 \value{
 A ggplot object of the plot

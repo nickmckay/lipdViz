@@ -11,7 +11,8 @@ plotTimeseriesEnsLines(
   alp = 0.2,
   color = "blue",
   n.ens.plot = 100,
-  na.rm = TRUE
+  na.rm = TRUE,
+  time.units = NA
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ plotTimeseriesEnsLines(
 \item{n.ens.plot}{Whats the maximum number of lines to plot?}
 
 \item{na.rm}{Remove NAs from X and Y? Set to FALSE to preserve line breaks where data are missing. (default = TRUE)}
+
+\item{time.units}{convert X, a time variable, to this time scale before plotting (e.g. "yr BP", "ka", "CE"). NA (default) keeps its own scale. Uses the time scale lipdR records on the column.}
 }
 \value{
 A ggplot object
