@@ -1,3 +1,7 @@
+# lipdViz 0.3.2
+
+* Requires lipdR 0.8.4 or later, which includes the `pullTsVariable()` fix from 0.8.3 and `filterByInterpretation()`.
+
 # lipdViz 0.3.1
 
 * `plotChronEns(time.units = ...)` left off the age model's calibrated-age distributions (from the model's distributionTable). They are now converted to the requested time scale and drawn with the ensemble, including on axes that run forward (yr CE). Each distribution's age column uses the time scale lipdR records for it, or the age ensemble's own scale if it has none. `plotModelDistributions()` gains `time.units` (and `fallback.scale`), and finds the age column when it isn't named `age` (e.g. `calAge`). The densities are drawn normalized, so they keep their shape when the units change magnitude (yr to ka). `truncate.dist` now works with any `dist.var`, not just `age`.
